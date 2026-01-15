@@ -60,11 +60,6 @@
         .heart-click {
             animation: heartbeat 0.4s ease-in-out;
         }
-        /* Zhuyin Font Style */
-        .zhuyin-text {
-            font-family: "Bopomofo", system-ui, -apple-system, sans-serif;
-            color: #ea580c; /* orange-600 */
-        }
     </style>
 </head>
 <body class="bg-orange-50">
@@ -90,97 +85,97 @@
         // id 66-89: 文句
         const rawData = [
             // --- 語詞部分 ---
-            { id: 1, question: "陶鑄", zhuyin: "ㄊㄠˊ ㄓㄨˋ", answer: "原指將金屬鎔化倒入陶製模型中冷卻凝固，做成各種器物。文中比喻造就、培育。", type: "term" },
-            { id: 2, question: "雍容", zhuyin: "ㄩㄥ ㄖㄨㄥˊ", answer: "儀態從容優雅。", type: "term" },
-            { id: 3, question: "睽睽", zhuyin: "ㄎㄨㄟˊ ㄎㄨㄟˊ", answer: "張大眼睛注視的樣子。", type: "term" },
-            { id: 4, question: "萬目睽睽", zhuyin: "ㄨㄢˋ ㄇㄨˋ ㄎㄨㄟˊ ㄎㄨㄟˊ", answer: "眾人的眼睛在注視、監督。", type: "term" },
-            { id: 5, question: "不屑", zhuyin: "ㄅㄨˋ ㄒㄧㄝˋ", answer: "認為不值得。屑，與「不」連用，表示輕視之意。", type: "term" },
-            { id: 6, question: "悻悻然", zhuyin: "ㄒㄧㄥˋ ㄒㄧㄥˋ ㄖㄢˊ", answer: "憤恨不平的樣子。", type: "term" },
-            { id: 7, question: "公諸", zhuyin: "ㄍㄨㄥ ㄓㄨ", answer: "將它公開在......。「諸」是「之於」二字的合音。", type: "term" },
-            { id: 8, question: "揖讓而升", zhuyin: "ㄧ ㄖㄤˋ ㄦˊ ㄕㄥ", answer: "拱手行禮，然後登臺。(揖：拱手行禮)。", type: "term" },
-            { id: 9, question: "下而飲", zhuyin: "ㄒㄧㄚˋ ㄦˊ ㄧㄣˋ", answer: "比賽完畢，作揖下臺，勝者請輸者喝酒。(飲：特指請對方喝酒)。", type: "term" },
-            { id: 10, question: "君子無所爭", zhuyin: "ㄐㄩㄣ ㄗˇ ㄨˊ ㄙㄨㄛˇ ㄓㄥ", answer: "君子重禮讓，沒有什麼要競爭的。", type: "term" },
-            { id: 11, question: "必也射乎", zhuyin: "ㄅㄧˋ ㄧㄝˇ ㄕㄜˋ ㄏㄨ", answer: "如果有(競爭)，也只有在比賽射箭的時候。", type: "term" },
-            { id: 12, question: "揭曉", zhuyin: "ㄐㄧㄝ ㄒㄧㄠˇ", answer: "公布使人知悉；公開表露出來。", type: "term" },
-            { id: 13, question: "竭誠", zhuyin: "ㄐㄧㄝˊ ㄔㄥˊ", answer: "盡、窮盡；十分誠懇。", type: "term" },
-            { id: 14, question: "精義", zhuyin: "ㄐㄧㄥ ㄧˋ", answer: "精要的義理。", type: "term" },
-            { id: 15, question: "傳記", zhuyin: "ㄓㄨㄢˋ ㄐㄧˋ", answer: "記述一個人生平事蹟的作品。", type: "term" },
-            { id: 16, question: "小人", zhuyin: "ㄒㄧㄠˇ ㄖㄣˊ", answer: "此指品德不好的人。(解析卷補充：亦可指平民百姓，但在本課指無德之人)。", type: "term" },
-            { id: 17, question: "暗箭傷人", zhuyin: "ㄢˋ ㄐㄧㄢˋ ㄕㄤ ㄖㄣˊ", answer: "趁人不備，用狡詐陰險的手段傷害人。", type: "term" },
-            { id: 18, question: "背地", zhuyin: "ㄅㄟˋ ㄉㄧˋ", answer: "暗中。", type: "term" },
-            { id: 19, question: "占小便宜", zhuyin: "ㄓㄢˋ ㄒㄧㄠˇ ㄆㄧㄢˊ ㄧˊ", answer: "用投機或不正當的方法得到額外的好處。", type: "term" },
-            { id: 20, question: "排斥", zhuyin: "ㄆㄞˊ ㄔˋ", answer: "排除駁斥；排除拒絕、摒棄不用。", type: "term" },
-            { id: 21, question: "覺察", zhuyin: "ㄐㄩㄝˊ ㄔㄚˊ", answer: "察知。", type: "term" },
-            { id: 22, question: "臨陣脫逃", zhuyin: "ㄌㄧㄣˊ ㄓㄣˋ ㄊㄨㄛ ㄊㄠˊ", answer: "軍人臨到上陣作戰時卻逃跑了。意謂臨場退怯。", type: "term" },
-            { id: 23, question: "半途而廢", zhuyin: "ㄅㄢˋ ㄊㄨˊ ㄦˊ ㄈㄟˋ", answer: "事情沒做成功就停止。比喻做事情有始無終。", type: "term" },
-            { id: 24, question: "貫徹始終", zhuyin: "ㄍㄨㄢˋ ㄔㄜˋ ㄕˇ ㄓㄨㄥ", answer: "自始至終，澈底實踐。", type: "term" },
-            { id: 25, question: "怨天尤人", zhuyin: "ㄩㄢˋ ㄊㄧㄢ ㄧㄡˊ ㄖㄣˊ", answer: "懷恨上天，責怪他人。(尤：責怪)。", type: "term" },
-            { id: 26, question: "怨尤", zhuyin: "ㄩㄢˋ ㄧㄡˊ", answer: "怨恨責怪。", type: "term" },
-            { id: 27, question: "無動於衷", zhuyin: "ㄨˊ ㄉㄨㄥˋ ㄩˊ ㄓㄨㄥ", answer: "心裡一點也不受感動。亦作「得失無動於衷」。", type: "term" },
-            { id: 28, question: "得失無動於衷", zhuyin: "ㄉㄜˊ ㄕ ㄨˊ ㄉㄨㄥˋ ㄩˊ ㄓㄨㄥ", answer: "不論成功或失敗，內心都不會受到影響。", type: "term" },
-            { id: 29, question: "任重道遠", zhuyin: "ㄖㄣˋ ㄓㄨㄥˋ ㄉㄠˋ ㄩㄢˇ", answer: "指責任重大，路途遙遠，需要長期艱苦奮鬥。", type: "term" },
-            { id: 30, question: "言必信，行必果", zhuyin: "ㄧㄢˊ ㄅㄧˋ ㄒㄧㄣˋ ， ㄒㄧㄥˊ ㄅㄧˋ ㄍㄨㄛˇ", answer: "說話必定要守信，做事必定要貫徹到底。(果：堅定不移)。", type: "term" },
-            { id: 31, question: "勝固欣然，敗亦可喜", zhuyin: "ㄕㄥˋ ㄍㄨˋ ㄒㄧㄣ ㄖㄢˊ ， ㄅㄞˋ ㄧˋ ㄎㄜˇ ㄒㄧˇ", answer: "勝了固然高興，敗了也值得欣喜。", type: "term" },
-            { id: 32, question: "宣誓", zhuyin: "ㄒㄩㄢ ㄕˋ", answer: "某些成員為忠實履行職務，公開聲明嚴守戒約的誓言。", type: "term" },
-            { id: 33, question: "前提", zhuyin: "ㄑㄧㄢˊ ㄊㄧˊ", answer: "應該先注意的部分。", type: "term" },
-            { id: 34, question: "超越勝敗", zhuyin: "ㄔㄠ ㄩㄝˋ ㄕㄥˋ ㄅㄞˋ", answer: "不計較成功或失敗。", type: "term" },
-            { id: 35, question: "創紀錄", zhuyin: "ㄔㄨㄤˋ ㄐㄧˋ ㄌㄨˋ", answer: "打破以往的成績或事例。", type: "term" },
-            { id: 36, question: "無聊", zhuyin: "ㄨˊ ㄌㄧㄠˊ", answer: "形容沒有意義的語言舉止。", type: "term" },
-            { id: 37, question: "莊嚴公正", zhuyin: "ㄓㄨㄤ ㄧㄢˊ ㄍㄨㄥ ㄓㄥˋ", answer: "莊重嚴肅，公平無私。", type: "term" },
-            { id: 38, question: "生命力", zhuyin: "ㄕㄥ ㄇㄧㄥˋ ㄌㄧˋ", answer: "維持生命活動或發展的能力。", type: "term" },
-            { id: 39, question: "心靈", zhuyin: "ㄒㄧㄣ ㄌㄧㄥˊ", answer: "人心中本有的智慧、思想和情感等。", type: "term" },
-            { id: 40, question: "病態", zhuyin: "ㄅㄧㄥˋ ㄊㄞˋ", answer: "心理上不正常的狀態。", type: "term" },
-            { id: 41, question: "民族性", zhuyin: "ㄇㄧㄣˊ ㄗㄨˊ ㄒㄧㄥˋ", answer: "一民族所共有的特性。", type: "term" },
-            { id: 42, question: "言簡意賅", zhuyin: "ㄧㄢˊ ㄐㄧㄢˇ ㄧˋ ㄍㄞ", answer: "言辭簡練，意思完備。", type: "term" },
-            { id: 43, question: "臘月", zhuyin: "ㄌㄚˋ ㄩㄝˋ", answer: "農曆十二月。", type: "term" },
-            { id: 44, question: "以升量石", zhuyin: "ㄧˇ ㄕㄥ ㄌㄧㄤˊ ㄉㄢˋ", answer: "指用小的容器測量大的容量。比喻以淺陋的思想揣度高深的道理。", type: "term" },
-            { id: 45, question: "深居簡出", zhuyin: "ㄕㄣ ㄐㄩ ㄐㄧㄢˇ ㄔㄨ", answer: "指居於深密的地方，很少外出。", type: "term" },
-            { id: 46, question: "信誓旦旦", zhuyin: "ㄒㄧㄣˋ ㄕˋ ㄉㄢˋ ㄉㄢˋ", answer: "誓言說得非常誠懇可靠。", type: "term" },
-            { id: 47, question: "秋毫無犯", zhuyin: "ㄑㄧㄡ ㄏㄠˊ ㄨˊ ㄈㄢˋ", answer: "一點都不侵犯。", type: "term" },
-            { id: 48, question: "有為有守", zhuyin: "ㄧㄡˇ ㄨㄟˊ ㄧㄡˇ ㄕㄡˇ", answer: "既有作為，又有節操。形容人的完美。", type: "term" },
-            { id: 49, question: "同舟共濟", zhuyin: "ㄊㄨㄥˊ ㄓㄡ ㄍㄨㄥˋ ㄐㄧˋ", answer: "比喻同心協力，戰勝困難。", type: "term" },
-            { id: 50, question: "能屈能伸", zhuyin: "ㄋㄥˊ ㄑㄩ ㄋㄥˊ ㄕㄣ", answer: "失意時能克制忍耐，得意時能施展抱負。", type: "term" },
-            { id: 51, question: "嶔崎磊落", zhuyin: "ㄑㄧㄣ ㄑㄧˊ ㄌㄟˇ ㄌㄨㄛˋ", answer: "比喻人品高潔，有骨氣。", type: "term" },
-            { id: 52, question: "茹苦含辛", zhuyin: "ㄖㄨˊ ㄎㄨˇ ㄏㄢˊ ㄒㄧㄣ", answer: "形容受盡種種辛苦。", type: "term" },
-            { id: 53, question: "沽名釣譽", zhuyin: "ㄍㄨ ㄇㄧㄥˊ ㄉㄧㄠˋ ㄩˋ", answer: "故意做作，用手段謀取名聲和讚譽。", type: "term" },
-            { id: 54, question: "隨波逐流", zhuyin: "ㄙㄨㄟˊ ㄅㄛ ㄓㄨˊ ㄌㄧㄡˊ", answer: "比喻人沒有確定的方向和目標，只依從環境、潮流而行動。", type: "term" },
-            { id: 55, question: "行百里者半九十", zhuyin: "ㄒㄧㄥˊ ㄅㄞˇ ㄌㄧˇ ㄓㄜˇ ㄅㄢˋ ㄐㄧㄡˇ ㄕˊ", answer: "行百里路的人，走了九十里，只算走了一半。比喻最後的階段最艱難。", type: "term" },
-            { id: 56, question: "木然", zhuyin: "ㄇㄨˋ ㄖㄢˊ", answer: "形容一時痴呆，不知所措的樣子。", type: "term" },
-            { id: 57, question: "歸咎", zhuyin: "ㄍㄨㄟ ㄐㄧㄡˋ", answer: "把罪惡或錯誤推到某人或某事上。", type: "term" },
-            { id: 58, question: "方圓", zhuyin: "ㄈㄤ ㄩㄢˊ", answer: "指周圍、附近。", type: "term" },
-            { id: 59, question: "規矩", zhuyin: "ㄍㄨㄟ ㄐㄩˇ", answer: "本指畫圓畫方的工具，後比喻為法度、禮法。", type: "term" },
-            { id: 60, question: "矛盾", zhuyin: "ㄇㄠˊ ㄉㄨㄣˋ", answer: "比喻言語行為自相抵觸。", type: "term" },
-            { id: 61, question: "枷鎖", zhuyin: "ㄐㄧㄚ ㄙㄨㄛˇ", answer: "古代刑具，後用來比喻束縛、壓迫。", type: "term" },
-            { id: 62, question: "功虧一簣", zhuyin: "ㄍㄨㄥ ㄎㄨㄟ ㄧ ㄎㄨㄟˋ", answer: "比喻事情不能堅持到底，只差最後的步驟而功敗垂成。", type: "term" },
-            { id: 63, question: "鍥而不捨", zhuyin: "ㄑㄧㄝˋ ㄦˊ ㄅㄨˋ ㄕㄜˇ", answer: "比喻堅持到底，奮勉不懈。", type: "term" },
-            { id: 64, question: "休休有容", zhuyin: "ㄒㄧㄡ ㄒㄧㄡ ㄧㄡˇ ㄖㄨㄥˊ", answer: "形容君子寬宏大量。(適合形容君子無所爭)。", type: "term" },
-            { id: 65, question: "自矜自恃", zhuyin: "ㄗˋ ㄐㄧㄣ ㄗˋ ㄕˋ", answer: "自以為是，倚仗自己的勢力。", type: "term" },
+            { id: 1, question: "陶鑄", answer: "原指將金屬鎔化倒入陶製模型中冷卻凝固，做成各種器物。文中比喻造就、培育。", type: "term" },
+            { id: 2, question: "雍容", answer: "儀態從容優雅。", type: "term" },
+            { id: 3, question: "睽睽", answer: "張大眼睛注視的樣子。", type: "term" },
+            { id: 4, question: "萬目睽睽", answer: "眾人的眼睛在注視、監督。", type: "term" },
+            { id: 5, question: "不屑", answer: "認為不值得。屑，與「不」連用，表示輕視之意。", type: "term" },
+            { id: 6, question: "悻悻然", answer: "憤恨不平的樣子。", type: "term" },
+            { id: 7, question: "公諸", answer: "將它公開在......。「諸」是「之於」二字的合音。", type: "term" },
+            { id: 8, question: "揖讓而升", answer: "拱手行禮，然後登臺。(揖：拱手行禮)。", type: "term" },
+            { id: 9, question: "下而飲", answer: "比賽完畢，作揖下臺，勝者請輸者喝酒。(飲：特指請對方喝酒)。", type: "term" },
+            { id: 10, question: "君子無所爭", answer: "君子重禮讓，沒有什麼要競爭的。", type: "term" },
+            { id: 11, question: "必也射乎", answer: "如果有(競爭)，也只有在比賽射箭的時候。", type: "term" },
+            { id: 12, question: "揭曉", answer: "公布使人知悉；公開表露出來。", type: "term" },
+            { id: 13, question: "竭誠", answer: "盡、窮盡；十分誠懇。", type: "term" },
+            { id: 14, question: "精義", answer: "精要的義理。", type: "term" },
+            { id: 15, question: "傳記", answer: "記述一個人生平事蹟的作品。", type: "term" },
+            { id: 16, question: "小人", answer: "此指品德不好的人。(解析卷補充：亦可指平民百姓，但在本課指無德之人)。", type: "term" },
+            { id: 17, question: "暗箭傷人", answer: "趁人不備，用狡詐陰險的手段傷害人。", type: "term" },
+            { id: 18, question: "背地", answer: "暗中。", type: "term" },
+            { id: 19, question: "占小便宜", answer: "用投機或不正當的方法得到額外的好處。", type: "term" },
+            { id: 20, question: "排斥", answer: "排除駁斥；排除拒絕、摒棄不用。", type: "term" },
+            { id: 21, question: "覺察", answer: "察知。", type: "term" },
+            { id: 22, question: "臨陣脫逃", answer: "軍人臨到上陣作戰時卻逃跑了。意謂臨場退怯。", type: "term" },
+            { id: 23, question: "半途而廢", answer: "事情沒做成功就停止。比喻做事情有始無終。", type: "term" },
+            { id: 24, question: "貫徹始終", answer: "自始至終，澈底實踐。", type: "term" },
+            { id: 25, question: "怨天尤人", answer: "懷恨上天，責怪他人。(尤：責怪)。", type: "term" },
+            { id: 26, question: "怨尤", answer: "怨恨責怪。", type: "term" },
+            { id: 27, question: "無動於衷", answer: "心裡一點也不受感動。亦作「得失無動於衷」。", type: "term" },
+            { id: 28, question: "得失無動於衷", answer: "不論成功或失敗，內心都不會受到影響。", type: "term" },
+            { id: 29, question: "任重道遠", answer: "指責任重大，路途遙遠，需要長期艱苦奮鬥。", type: "term" },
+            { id: 30, question: "言必信，行必果", answer: "說話必定要守信，做事必定要貫徹到底。(果：堅定不移)。", type: "term" },
+            { id: 31, question: "勝固欣然，敗亦可喜", answer: "勝了固然高興，敗了也值得欣喜。", type: "term" },
+            { id: 32, question: "宣誓", answer: "某些成員為忠實履行職務，公開聲明嚴守戒約的誓言。", type: "term" },
+            { id: 33, question: "前提", answer: "應該先注意的部分。", type: "term" },
+            { id: 34, question: "超越勝敗", answer: "不計較成功或失敗。", type: "term" },
+            { id: 35, question: "創紀錄", answer: "打破以往的成績或事例。", type: "term" },
+            { id: 36, question: "無聊", answer: "形容沒有意義的語言舉止。", type: "term" },
+            { id: 37, question: "莊嚴公正", answer: "莊重嚴肅，公平無私。", type: "term" },
+            { id: 38, question: "生命力", answer: "維持生命活動或發展的能力。", type: "term" },
+            { id: 39, question: "心靈", answer: "人心中本有的智慧、思想和情感等。", type: "term" },
+            { id: 40, question: "病態", answer: "心理上不正常的狀態。", type: "term" },
+            { id: 41, question: "民族性", answer: "一民族所共有的特性。", type: "term" },
+            { id: 42, question: "言簡意賅", answer: "言辭簡練，意思完備。", type: "term" },
+            { id: 43, question: "臘月", answer: "農曆十二月。", type: "term" },
+            { id: 44, question: "以升量石", answer: "指用小的容器測量大的容量。比喻以淺陋的思想揣度高深的道理。", type: "term" },
+            { id: 45, question: "深居簡出", answer: "指居於深密的地方，很少外出。", type: "term" },
+            { id: 46, question: "信誓旦旦", answer: "誓言說得非常誠懇可靠。", type: "term" },
+            { id: 47, question: "秋毫無犯", answer: "一點都不侵犯。", type: "term" },
+            { id: 48, question: "有為有守", answer: "既有作為，又有節操。形容人的完美。", type: "term" },
+            { id: 49, question: "同舟共濟", answer: "比喻同心協力，戰勝困難。", type: "term" },
+            { id: 50, question: "能屈能伸", answer: "失意時能克制忍耐，得意時能施展抱負。", type: "term" },
+            { id: 51, question: "嶔崎磊落", answer: "比喻人品高潔，有骨氣。", type: "term" },
+            { id: 52, question: "茹苦含辛", answer: "形容受盡種種辛苦。", type: "term" },
+            { id: 53, question: "沽名釣譽", answer: "故意做作，用手段謀取名聲和讚譽。", type: "term" },
+            { id: 54, question: "隨波逐流", answer: "比喻人沒有確定的方向和目標，只依從環境、潮流而行動。", type: "term" },
+            { id: 55, question: "行百里者半九十", answer: "行百里路的人，走了九十里，只算走了一半。比喻最後的階段最艱難。", type: "term" },
+            { id: 56, question: "木然", answer: "形容一時痴呆，不知所措的樣子。", type: "term" },
+            { id: 57, question: "歸咎", answer: "把罪惡或錯誤推到某人或某事上。", type: "term" },
+            { id: 58, question: "方圓", answer: "指周圍、附近。", type: "term" },
+            { id: 59, question: "規矩", answer: "本指畫圓畫方的工具，後比喻為法度、禮法。", type: "term" },
+            { id: 60, question: "矛盾", answer: "比喻言語行為自相抵觸。", type: "term" },
+            { id: 61, question: "枷鎖", answer: "古代刑具，後用來比喻束縛、壓迫。", type: "term" },
+            { id: 62, question: "功虧一簣", answer: "比喻事情不能堅持到底，只差最後的步驟而功敗垂成。", type: "term" },
+            { id: 63, question: "鍥而不捨", answer: "比喻堅持到底，奮勉不懈。", type: "term" },
+            { id: 64, question: "休休有容", answer: "形容君子寬宏大量。(適合形容君子無所爭)。", type: "term" },
+            { id: 65, question: "自矜自恃", answer: "自以為是，倚仗自己的勢力。", type: "term" },
 
             // --- 重要文句部分 ---
-            { id: 66, question: "健全的心靈，寓於健全的身體", zhuyin: "ㄐㄧㄢˋ ㄑㄩㄢˊ ㄉㄜ˙ ㄒㄧㄣ ㄌㄧㄥˊ ， ㄩˋ ㄩˊ ㄐㄧㄢˋ ㄑㄩㄢˊ ㄉㄜ˙ ㄕㄣ ㄊㄧˇ", answer: "說明健康的身體是健全心靈的基礎，二者關係密切，互為表裡。（引用 (希臘諺語)）", type: "sentence" },
-            { id: 67, question: "運動的精義，還不只此。它更有道德的意義", zhuyin: "ㄩㄣˋ ㄉㄨㄥˋ ㄉㄜ˙ ㄐㄧㄥ ㄧˋ ， ㄏㄞˊ ㄅㄨˋ ㄓˇ ㄘˇ 。 ㄊㄚ ㄍㄥˋ ㄧㄡˇ ㄉㄠˋ ㄉㄜˊ ㄉㄜ˙ ㄧˋ ㄧˋ", answer: "將運動從「體育」的範疇提升至「品格教育」的層次。說明培育優良品格比勝敗更重要。（轉折 (承上啟下)）", type: "sentence" },
-            { id: 68, question: "君子無所爭，必也射乎。揖讓而升，下而飲，其爭也君子", zhuyin: "ㄐㄩㄣ ㄗˇ ㄨˊ ㄙㄨㄛˇ ㄓㄥ ， ㄅㄧˋ ㄧㄝˇ ㄕㄜˋ ㄏㄨ 。 ㄧ ㄖㄤˋ ㄦˊ ㄕㄥ ， ㄒㄧㄚˋ ㄦˊ ㄧㄣˋ ， ㄑㄧˊ ㄓㄥ ㄧㄝˇ ㄐㄩㄣ ㄗˇ", answer: "這是行為合宜、進退守禮的「君子之爭」。強調遵守規則，作公平、光明而有禮的競爭。（引用 (論語)、君子之爭、謙讓修養）", type: "sentence" },
-            { id: 69, question: "運動是要守著一定的規律，在萬目睽睽的監視之下，從公開競爭而求得勝利的", zhuyin: "ㄩㄣˋ ㄉㄨㄥˋ ㄕˋ ㄧㄠˋ ㄕㄡˇ ㄓㄜ˙ ㄧ ㄉㄧㄥˋ ㄉㄜ˙ ㄍㄨㄟ ㄌㄩˋ ， ㄗㄞˋ ㄨㄢˋ ㄇㄨˋ ㄎㄨㄟˊ ㄎㄨㄟˊ ㄉㄜ˙ ㄐㄧㄢ ㄕˋ ㄓ ㄒㄧㄚˋ ， ㄘㄨㄥˊ ㄍㄨㄥ ㄎㄞ ㄐㄧㄥˋ ㄓㄥ ㄦˊ ㄑㄧㄡˊ ㄉㄜˊ ㄕㄥˋ ㄌㄧˋ ㄉㄜ˙", answer: "說明運動家應光明正大，不可投機取巧。（君子之爭）", type: "sentence" },
-            { id: 70, question: "君子不怨天，不尤人", zhuyin: "ㄐㄩㄣ ㄗˇ ㄅㄨˊ ㄩㄢˋ ㄊㄧㄢ ， ㄅㄨˋ ㄧㄡˊ ㄖㄣˊ", answer: "這是「服輸的精神」，也是「反求諸己」、「反躬自省」的態度。輸了只怪自己不行，不怪運氣或別人。（引用 (論語)、服輸的精神、反求諸己）", type: "sentence" },
-            { id: 71, question: "我輸了只怪我自己不行......人家勝了，是他本事好，我只有佩服他", zhuyin: "ㄨㄛˇ ㄕㄨ ㄌㄜ˙ ㄓˇ ㄍㄨㄞˋ ㄨㄛˇ ㄗˋ ㄐㄧˇ ㄅㄨˋ ㄒㄧㄥˊ ...... ㄖㄣˊ ㄐㄧㄚ ㄕㄥˋ ㄌㄜ˙ ， ㄕˋ ㄊㄚ ㄅㄣˇ ㄕˋ ㄏㄠˇ ， ㄨㄛˇ ㄓˇ ㄧㄡˇ ㄆㄟˋ ㄈㄨˊ ㄊㄚ", answer: "「服輸」就是「服善」，代表能「欣賞他人」且知「自我反省」的美德。（服輸的精神）", type: "sentence" },
-            { id: 72, question: "罵他不但是無聊，而且是無恥", zhuyin: "ㄇㄚˋ ㄊㄚ ㄅㄨˊ ㄉㄢˋ ㄕˋ ㄨˊ ㄌㄧㄠˊ ， ㄦˊ ㄑㄧㄝˇ ㄕˋ ㄨˊ ㄔˇ", answer: "強調輸不起、辱罵對手是缺乏風度的表現。（反面論述）", type: "sentence" },
-            { id: 73, question: "羅斯福收到第一個賀電，就是威爾基發的", zhuyin: "ㄌㄨㄛˊ ㄙ ㄈㄨˊ ㄕㄡ ㄉㄠˋ ㄉㄧˋ ㄧ ㄍㄜ˙ ㄏㄜˋ ㄉㄧㄢˋ ， ㄐㄧㄡˋ ㄕˋ ㄨㄟ ㄦˇ ㄐㄧ ㄈㄚ ㄉㄜ˙", answer: "表現出「服輸的精神」與「超越勝敗的心胸」。贏者有風度，輸者有氣度。（事例、服輸的精神）", type: "sentence" },
-            { id: 74, question: "威爾基失敗以後，還幫助羅斯福作種種外交活動，一切以國家為前提", zhuyin: "ㄨㄟ ㄦˇ ㄐㄧ ㄕ ㄅㄞˋ ㄧˇ ㄏㄡˋ ， ㄏㄞˊ ㄅㄤ ㄓㄨˋ ㄌㄨㄛˊ ㄙ ㄈㄨˊ ㄗㄨㄛˋ ㄓㄨㄥˇ ㄓㄨㄥˇ ㄨㄞˋ ㄐㄧㄠ ㄏㄨㄛˊ ㄉㄨㄥˋ ， ㄧˊ ㄑㄧㄝˋ ㄧˇ ㄍㄨㄛˊ ㄐㄧㄚ ㄨㄟˊ ㄑㄧㄢˊ ㄊㄧˊ", answer: "除了服輸精神外，更展現了「公而忘私」的胸襟。（公而忘私、服輸的精神）", type: "sentence" },
-            { id: 75, question: "勝利者和失敗者隔網握手", zhuyin: "ㄕㄥˋ ㄌㄧˋ ㄓㄜˇ ㄏㄢˋ ㄕ ㄅㄞˋ ㄓㄜˇ ㄍㄜˊ ㄨㄤˇ ㄨㄛˋ ㄕㄡˇ", answer: "代表勝利者有君子風度，失敗者有服輸的精神。(勇於服輸、尊敬對手)。（服輸的精神）", type: "sentence" },
-            { id: 76, question: "勝固欣然，敗亦可喜", zhuyin: "ㄕㄥˋ ㄍㄨˋ ㄒㄧㄣ ㄖㄢˊ ， ㄅㄞˋ ㄧˋ ㄎㄜˇ ㄒㄧˇ", answer: "這是「超越勝敗的心胸」。面對比賽光明磊落，無論勝敗都是一種收穫，能達到「得失無動於衷」的境地。（引用 (蘇軾)、超越勝敗、映襯）", type: "sentence" },
-            { id: 77, question: "言必信，行必果", zhuyin: "ㄧㄢˊ ㄅㄧˋ ㄒㄧㄣˋ ， ㄒㄧㄥˊ ㄅㄧˋ ㄍㄨㄛˇ", answer: "說明運動家要有「貫徹始終」的精神。絕不臨陣脫逃，不半途而廢。（引用 (論語)、貫徹始終）", type: "sentence" },
-            { id: 78, question: "運動會要舉行宣誓", zhuyin: "ㄩㄣˋ ㄉㄨㄥˋ ㄏㄨㄟˋ ㄧㄠˋ ㄐㄩˇ ㄒㄧㄥˊ ㄒㄩㄢ ㄕˋ", answer: "表現「貫徹始終」與「言必信，行必果」的精神。（貫徹始終）", type: "sentence" },
-            { id: 79, question: "賽跑落後，無希望得獎，還要努力跑到的人", zhuyin: "ㄙㄞˋ ㄆㄠˇ ㄌㄨㄛˋ ㄏㄡˋ ， ㄨˊ ㄒㄧ ㄨㄤˋ ㄉㄜˊ ㄐㄧㄤˇ ， ㄏㄞˊ ㄧㄠˋ ㄋㄨˇ ㄌㄧˋ ㄆㄠˇ ㄉㄠˋ ㄉㄜ˙ ㄖㄣˊ", answer: "表現「貫徹始終」的毅力與「任重道遠」的精神。（貫徹始終、有毅力）", type: "sentence" },
-            { id: 80, question: "有運動家風度的人，寧可有光明的失敗，絕不要不榮譽的成功！", zhuyin: "ㄧㄡˇ ㄩㄣˋ ㄉㄨㄥˋ ㄐㄧㄚ ㄈㄥ ㄉㄨˋ ㄉㄜ˙ ㄖㄣˊ ， ㄋㄧㄥˊ ㄎㄜˇ ㄧㄡˇ ㄍㄨㄤ ㄇㄧㄥˊ ㄉㄜ˙ ㄕ ㄅㄞˋ ， ㄐㄩㄝˊ ㄅㄨˊ ㄧㄠˋ ㄅㄨˋ ㄖㄨㄥˊ ㄩˋ ㄉㄜ˙ ㄔㄥˊ ㄍㄨㄥ ！", answer: "這是君子風度的表現，贏得的是「人格上的錦標」。強調手段的光明正大比結果的勝負更重要。（映襯、結論）", type: "sentence" },
-            { id: 81, question: "運動家的風度表現在人生上，是一個莊嚴公正、協調進取的人生", zhuyin: "ㄩㄣˋ ㄉㄨㄥˋ ㄐㄧㄚ ㄉㄜ˙ ㄈㄥ ㄉㄨˋ ㄅㄧㄠˇ ㄒㄧㄢˋ ㄗㄞˋ ㄖㄣˊ ㄕㄥ ㄕㄤˋ ， ㄕˋ ㄧ ㄍㄜ˙ ㄓㄨㄤ ㄧㄢˊ ㄍㄨㄥ ㄓㄥˋ 、 ㄒㄧㄝˊ ㄊㄧㄠˊ ㄐㄧㄣˋ ㄑㄩˇ ㄉㄜ˙ ㄖㄣˊ ㄕㄥ", answer: "總結全文，將運動精神推廣至人生態度。（總結）", type: "sentence" },
-            { id: 82, question: "任重而道遠", zhuyin: "ㄖㄣˋ ㄓㄨㄥˋ ㄦˊ ㄉㄠˋ ㄩㄢˇ", answer: "說明運動家應有長期奮鬥、負重致遠的精神。（引用 (論語)）", type: "sentence" },
-            { id: 83, question: "陶鑄優良的民族性", zhuyin: "ㄊㄠˊ ㄓㄨˋ ㄧㄡ ㄌㄧㄤˊ ㄉㄜ˙ ㄇㄧㄣˊ ㄗㄨˊ ㄒㄧㄥˋ", answer: "運動的道德意義之最高層次（個人→政治→民族）。（層遞 (概念上)）", type: "sentence" },
-            { id: 84, question: "真正的考驗，並不是第一里路，而是旅程最後一里路", zhuyin: "ㄓㄣ ㄓㄥˋ ㄉㄜ˙ ㄎㄠˇ ㄧㄢˋ ， ㄅㄧㄥˋ ㄅㄨˊ ㄕˋ ㄉㄧˋ ㄧ ㄌㄧˇ ㄌㄨˋ ， ㄦˊ ㄕˋ ㄌㄩˇ ㄔㄥˊ ㄗㄨㄟˋ ㄏㄡˋ ㄧ ㄌㄧˇ ㄌㄨˋ", answer: "強調堅持到底的重要性。（行百里者半九十）", type: "sentence" },
-            { id: 85, question: "君子欲訥於言，而敏於行", zhuyin: "ㄐㄩㄣ ㄗˇ ㄩˋ ㄋㄜˋ ㄩˊ ㄧㄢˊ ， ㄦˊ ㄇㄧㄣˇ ㄩˊ ㄒㄧㄥˊ", answer: "君子話說得不多，而敏捷勤奮地追求於力行的功夫。（寡言力行）", type: "sentence" },
-            { id: 86, question: "把掌聲留給自己......你的朋友會少一個", zhuyin: "ㄅㄚˇ ㄓㄤˇ ㄕㄥ ㄌㄧㄡˊ ㄍㄟˇ ㄗˋ ㄐㄧˇ ...... ㄋㄧˇ ㄉㄜ˙ ㄆㄥˊ ㄧㄡˇ ㄏㄨㄟˋ ㄕㄠˇ ㄧ ㄍㄜ˙", answer: "鼓勵人要懂得分享與讚美，讚美對友誼有正面意義。（分享榮耀）", type: "sentence" },
-            { id: 87, question: "無知的狂熱乃是一匹脫韁之馬", zhuyin: "ㄨˊ ㄓ ㄉㄜ˙ ㄎㄨㄤˊ ㄖㄜˋ ㄋㄞˇ ㄕˋ ㄧ ㄆㄧ ㄊㄨㄛ ㄐㄧㄤ ㄓ ㄇㄚˇ", answer: "只有熱情而沒有智慧或方向，往往會成事不足，敗事有餘。（成事不足，敗事有餘）", type: "sentence" },
-            { id: 88, question: "不能低頭的人，是因為一再回顧過去的成就", zhuyin: "ㄅㄨˋ ㄋㄥˊ ㄉㄧ ㄊㄡˊ ㄉㄜ˙ ㄖㄣˊ ， ㄕˋ ㄧㄣ ㄨㄟˋ ㄧ ㄗㄞˋ ㄏㄨㄟˊ ㄍㄨˋ ㄍㄨㄛˋ ㄑㄩˋ ㄉㄜ˙ ㄔㄥˊ ㄐㄧㄡˋ", answer: "說明耽溺於昔日輝煌的人，往往容易自誇自大(自矜自恃)。（自矜自恃）", type: "sentence" },
-            { id: 89, question: "我沒辦法決定我的成績如何，但我可以決定我在比賽中的樣子", zhuyin: "ㄨㄛˇ ㄇㄟˊ ㄅㄢˋ ㄈㄚˇ ㄐㄩㄝˊ ㄉㄧㄥˋ ㄨㄛˇ ㄉㄜ˙ ㄔㄥˊ ㄐㄧ ㄖㄨˊ ㄏㄜˊ ， ㄉㄢˋ ㄨㄛˇ ㄎㄜˇ ㄧˇ ㄐㄩㄝˊ ㄉㄧㄥˋ ㄨㄛˇ ㄗㄞˋ ㄅㄧˇ ㄙㄞˋ ㄓㄨㄥ ㄉㄜ˙ ㄧㄤˋ ㄗ˙", answer: "(李洋名言) 展現「與其追求勝利，不如全力以赴，享受比賽」的精神。（超越勝敗、享受比賽）", type: "sentence" }
+            { id: 66, question: "健全的心靈，寓於健全的身體", answer: "說明健康的身體是健全心靈的基礎，二者關係密切，互為表裡。（引用 (希臘諺語)）", type: "sentence" },
+            { id: 67, question: "運動的精義，還不只此。它更有道德的意義", answer: "將運動從「體育」的範疇提升至「品格教育」的層次。說明培育優良品格比勝敗更重要。（轉折 (承上啟下)）", type: "sentence" },
+            { id: 68, question: "君子無所爭，必也射乎。揖讓而升，下而飲，其爭也君子", answer: "這是行為合宜、進退守禮的「君子之爭」。強調遵守規則，作公平、光明而有禮的競爭。（引用 (論語)、君子之爭、謙讓修養）", type: "sentence" },
+            { id: 69, question: "運動是要守著一定的規律，在萬目睽睽的監視之下，從公開競爭而求得勝利的", answer: "說明運動家應光明正大，不可投機取巧。（君子之爭）", type: "sentence" },
+            { id: 70, question: "君子不怨天，不尤人", answer: "這是「服輸的精神」，也是「反求諸己」、「反躬自省」的態度。輸了只怪自己不行，不怪運氣或別人。（引用 (論語)、服輸的精神、反求諸己）", type: "sentence" },
+            { id: 71, question: "我輸了只怪我自己不行......人家勝了，是他本事好，我只有佩服他", answer: "「服輸」就是「服善」，代表能「欣賞他人」且知「自我反省」的美德。（服輸的精神）", type: "sentence" },
+            { id: 72, question: "罵他不但是無聊，而且是無恥", answer: "強調輸不起、辱罵對手是缺乏風度的表現。（反面論述）", type: "sentence" },
+            { id: 73, question: "羅斯福收到第一個賀電，就是威爾基發的", answer: "表現出「服輸的精神」與「超越勝敗的心胸」。贏者有風度，輸者有氣度。（事例、服輸的精神）", type: "sentence" },
+            { id: 74, question: "威爾基失敗以後，還幫助羅斯福作種種外交活動，一切以國家為前提", answer: "除了服輸精神外，更展現了「公而忘私」的胸襟。（公而忘私、服輸的精神）", type: "sentence" },
+            { id: 75, question: "勝利者和失敗者隔網握手", answer: "代表勝利者有君子風度，失敗者有服輸的精神。(勇於服輸、尊敬對手)。（服輸的精神）", type: "sentence" },
+            { id: 76, question: "勝固欣然，敗亦可喜", answer: "這是「超越勝敗的心胸」。面對比賽光明磊落，無論勝敗都是一種收穫，能達到「得失無動於衷」的境地。（引用 (蘇軾)、超越勝敗、映襯）", type: "sentence" },
+            { id: 77, question: "言必信，行必果", answer: "說明運動家要有「貫徹始終」的精神。絕不臨陣脫逃，不半途而廢。（引用 (論語)、貫徹始終）", type: "sentence" },
+            { id: 78, question: "運動會要舉行宣誓", answer: "表現「貫徹始終」與「言必信，行必果」的精神。（貫徹始終）", type: "sentence" },
+            { id: 79, question: "賽跑落後，無希望得獎，還要努力跑到的人", answer: "表現「貫徹始終」的毅力與「任重道遠」的精神。（貫徹始終、有毅力）", type: "sentence" },
+            { id: 80, question: "有運動家風度的人，寧可有光明的失敗，絕不要不榮譽的成功！", answer: "這是君子風度的表現，贏得的是「人格上的錦標」。強調手段的光明正大比結果的勝負更重要。（映襯、結論）", type: "sentence" },
+            { id: 81, question: "運動家的風度表現在人生上，是一個莊嚴公正、協調進取的人生", answer: "總結全文，將運動精神推廣至人生態度。（總結）", type: "sentence" },
+            { id: 82, question: "任重而道遠", answer: "說明運動家應有長期奮鬥、負重致遠的精神。（引用 (論語)）", type: "sentence" },
+            { id: 83, question: "陶鑄優良的民族性", answer: "運動的道德意義之最高層次（個人→政治→民族）。（層遞 (概念上)）", type: "sentence" },
+            { id: 84, question: "真正的考驗，並不是第一里路，而是旅程最後一里路", answer: "強調堅持到底的重要性。（行百里者半九十）", type: "sentence" },
+            { id: 85, question: "君子欲訥於言，而敏於行", answer: "君子話說得不多，而敏捷勤奮地追求於力行的功夫。（寡言力行）", type: "sentence" },
+            { id: 86, question: "把掌聲留給自己......你的朋友會少一個", answer: "鼓勵人要懂得分享與讚美，讚美對友誼有正面意義。（分享榮耀）", type: "sentence" },
+            { id: 87, question: "無知的狂熱乃是一匹脫韁之馬", answer: "只有熱情而沒有智慧或方向，往往會成事不足，敗事有餘。（成事不足，敗事有餘）", type: "sentence" },
+            { id: 88, question: "不能低頭的人，是因為一再回顧過去的成就", answer: "說明耽溺於昔日輝煌的人，往往容易自誇自大(自矜自恃)。（自矜自恃）", type: "sentence" },
+            { id: 89, question: "我沒辦法決定我的成績如何，但我可以決定我在比賽中的樣子", answer: "(李洋名言) 展現「與其追求勝利，不如全力以赴，享受比賽」的精神。（超越勝敗、享受比賽）", type: "sentence" }
         ];
 
         // --- Helper Functions ---
@@ -526,7 +521,6 @@
                       <th className="p-4 font-black text-orange-900 border-b-2 border-orange-200 w-16 text-center">收藏</th>
                       <th className="p-4 font-black text-orange-900 border-b-2 border-orange-200 w-16">編號</th>
                       <th className="p-4 font-black text-orange-900 border-b-2 border-orange-200 w-1/4">語詞 / 文句</th>
-                      <th className="p-4 font-black text-orange-900 border-b-2 border-orange-200 w-1/4">注音</th>
                       <th className="p-4 font-black text-orange-900 border-b-2 border-orange-200">注釋或摘釋</th>
                     </tr>
                   </thead>
@@ -545,13 +539,12 @@
                           </td>
                           <td className="p-4 text-stone-500 font-mono font-medium">{item.id}</td>
                           <td className="p-4 text-stone-800 text-lg font-medium">{item.question}</td>
-                          <td className="p-4 text-lg font-medium zhuyin-text">{item.zhuyin}</td>
                           <td className="p-4 text-orange-700 text-lg font-bold">{item.answer}</td>
                         </tr>
                       );
                     }) : (
                       <tr>
-                        <td colSpan="5" className="p-12 text-center text-stone-400 flex flex-col items-center justify-center">
+                        <td colSpan="4" className="p-12 text-center text-stone-400 flex flex-col items-center justify-center">
                             <div className="mb-2 bg-stone-100 p-4 rounded-full">
                                 <List size={32} />
                             </div>
@@ -580,36 +573,20 @@
 
           // Initialize quiz data with dynamic options on mount
           useEffect(() => {
-            // SHUFFLE DATA FIRST (Randomized Question Order)
-            const shuffledRawData = shuffleArray(data);
-
-            const preparedData = shuffledRawData.map(item => {
-              // INTELLIGENT DISTRACTOR LOGIC
-              // 1. Filter items of same type
-              let candidates = data.filter(i => i.id !== item.id && i.type === item.type);
-              
-              // 2. Sort candidates by length difference (Closer length = Better distractor)
-              const targetLen = item.question.length;
-              candidates.sort((a, b) => {
-                  const diffA = Math.abs(a.question.length - targetLen);
-                  const diffB = Math.abs(b.question.length - targetLen);
-                  return diffA - diffB;
-              });
-
-              // 3. Take top 10 closest length candidates to shuffle from
-              let topCandidates = candidates.slice(0, 10);
-              
-              // If not enough candidates, fallback to random other items
-              if (topCandidates.length < 3) {
-                 topCandidates = data.filter(i => i.id !== item.id);
+            const preparedData = data.map(item => {
+              // 1. Filter other items of the SAME type to be better distractors (term vs sentence)
+              // If not enough items of same type, fallback to all data
+              let otherItems = data.filter(i => i.id !== item.id && i.type === item.type);
+              if (otherItems.length < 3) {
+                 otherItems = data.filter(i => i.id !== item.id);
               }
+
+              const shuffledOthers = shuffleArray(otherItems);
               
-              const shuffledOthers = shuffleArray(topCandidates);
-              
-              // 4. Options are the "Questions" (Terms)
+              // 2. IMPORTANT CHANGE: Options are now the "Questions" (Terms), not "Answers" (Definitions)
               const selectedDistractors = shuffledOthers.slice(0, 3).map(i => i.question);
               
-              // 5. Combine current item's Question (Term) and distractors, then shuffle
+              // 3. Combine current item's Question (Term) and distractors, then shuffle
               const options = shuffleArray([item.question, ...selectedDistractors]);
               
               return { ...item, options };
@@ -777,7 +754,7 @@
                                 </div>
                                 {isAnswered && !isCorrect && (
                                     <div className="mt-3 text-sm text-red-600 font-medium animate-in fade-in slide-in-from-top-1 bg-red-50 p-2 rounded border border-red-100">
-                                        正確答案：{item.question} <span className="zhuyin-text ml-2 text-red-500">{item.zhuyin}</span>
+                                        正確答案：{item.question}
                                     </div>
                                 )}
                             </div>
