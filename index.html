@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第4冊 L1 運動家的風度 注釋練習</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Import Map to handle ES Modules for React and Lucide -->
+    <script type="importmap">
+    {
+        "imports": {
+            "react": "https://esm.sh/react@18.2.0",
+            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+            "lucide-react": "https://esm.sh/lucide-react@0.263.1",
+            "canvas-confetti": "https://esm.sh/canvas-confetti@1.9.2"
+        }
+    }
+    </script>
+    
+    <style>
+        /* Custom scrollbar for better aesthetics - Warm Orange Theme */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #fff7ed; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #fdba74; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #fb923c; 
+        }
+        /* Hide scrollbar for clean horizontal scroll if needed */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Progress bar transition */
+        .progress-bar {
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        /* Heart animation */
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.2); }
+            50% { transform: scale(1); }
+            75% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .heart-click {
+            animation: heartbeat 0.4s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-orange-50">
+    <div id="root"></div>
+
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect, useMemo, useCallback } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import { BookOpen, HelpCircle, CheckCircle, XCircle, ArrowRight, RefreshCcw, List, Sun, User, LogOut, Zap, Heart, BookX, Brain } from 'lucide-react';
+        import confetti from 'canvas-confetti';
+
+        // STORAGE KEYS - Updated prefix for new lesson
+        const STORAGE_PREFIX = 'Chinese4-L1-1';
+        const KEY_USERS = `${STORAGE_PREFIX}_users`;
+        
+        // Helper to get dynamic keys
+        const getKeyFavorites = (user) => `${STORAGE_PREFIX}_fav_${user}`;
+        const getKeyMistakes = (user) => `${STORAGE_PREFIX}_mistake_${user}`;
+        const getKeyProgress = (user) => `${STORAGE_PREFIX}_progress_${user}`;
+
+        // 注釋或摘釋完整資料庫 - 第4冊 L1 運動家的風度
+        // id 1-65: 語詞
+        // id 66-89: 文句
+        const rawData = [
+            // --- 語詞部分 ---
+            { id: 1, question: "陶鑄", answer: "原指將金屬鎔化倒入陶製模型中冷卻凝固，做成各種器物。文中比喻造就、培育。", type: "term" },
+            { id: 2, question: "雍容", answer: "儀態從容優雅。", type: "term" },
+            { id: 3, question: "睽睽", answer: "張大眼睛注視的樣子。", type: "term" },
+            { id: 4, question: "萬目睽睽", answer: "眾人的眼睛在注視、監督。", type: "term" },
+            { id: 5, question: "不屑", answer: "認為不值得。屑，與「不」連用，表示輕視之意。", type: "term" },
+            { id: 6, question: "悻悻然", answer: "憤恨不平的樣子。", type: "term" },
+            { id: 7, question: "公諸", answer: "將它公開在......。「諸」是「之於」二字的合音。", type: "term" },
+            { id: 8, question: "揖讓而升", answer: "拱手行禮，然後登臺。(揖：拱手行禮)。", type: "term" },
+            { id: 9, question: "下而飲", answer: "比賽完畢，作揖下臺，勝者請輸者喝酒。(飲：特指請對方喝酒)。", type: "term" },
+            { id: 10, question: "君子無所爭", answer: "君子重禮讓，沒有什麼要競爭的。", type: "term" },
+            { id: 11, question: "必也射乎", answer: "如果有(競爭)，也只有在比賽射箭的時候。", type: "term" },
+            { id: 12, question: "揭曉", answer: "公布使人知悉；公開表露出來。", type: "term" },
+            { id: 13, question: "竭誠", answer: "盡、窮盡；十分誠懇。", type: "term" },
+            { id: 14, question: "精義", answer: "精要的義理。", type: "term" },
+            { id: 15, question: "傳記", answer: "記述一個人生平事蹟的作品。", type: "term" },
+            { id: 16, question: "小人", answer: "此指品德不好的人。(解析卷補充：亦可指平民百姓，但在本課指無德之人)。", type: "term" },
+            { id: 17, question: "暗箭傷人", answer: "趁人不備，用狡詐陰險的手段傷害人。", type: "term" },
+            { id: 18, question: "背地", answer: "暗中。", type: "term" },
+            { id: 19, question: "占小便宜", answer: "用投機或不正當的方法得到額外的好處。", type: "term" },
+            { id: 20, question: "排斥", answer: "排除駁斥；排除拒絕、摒棄不用。", type: "term" },
+            { id: 21, question: "覺察", answer: "察知。", type: "term" },
+            { id: 22, question: "臨陣脫逃", answer: "軍人臨到上陣作戰時卻逃跑了。意謂臨場退怯。", type: "term" },
+            { id: 23, question: "半途而廢", answer: "事情沒做成功就停止。比喻做事情有始無終。", type: "term" },
+            { id: 24, question: "貫徹始終", answer: "自始至終，澈底實踐。", type: "term" },
+            { id: 25, question: "怨天尤人", answer: "懷恨上天，責怪他人。(尤：責怪)。", type: "term" },
+            { id: 26, question: "怨尤", answer: "怨恨責怪。", type: "term" },
+            { id: 27, question: "無動於衷", answer: "心裡一點也不受感動。亦作「得失無動於衷」。", type: "term" },
+            { id: 28, question: "得失無動於衷", answer: "不論成功或失敗，內心都不會受到影響。", type: "term" },
+            { id: 29, question: "任重道遠", answer: "指責任重大，路途遙遠，需要長期艱苦奮鬥。", type: "term" },
+            { id: 30, question: "言必信，行必果", answer: "說話必定要守信，做事必定要貫徹到底。(果：堅定不移)。", type: "term" },
+            { id: 31, question: "勝固欣然，敗亦可喜", answer: "勝了固然高興，敗了也值得欣喜。", type: "term" },
+            { id: 32, question: "宣誓", answer: "某些成員為忠實履行職務，公開聲明嚴守戒約的誓言。", type: "term" },
+            { id: 33, question: "前提", answer: "應該先注意的部分。", type: "term" },
+            { id: 34, question: "超越勝敗", answer: "不計較成功或失敗。", type: "term" },
+            { id: 35, question: "創紀錄", answer: "打破以往的成績或事例。", type: "term" },
+            { id: 36, question: "無聊", answer: "形容沒有意義的語言舉止。", type: "term" },
+            { id: 37, question: "莊嚴公正", answer: "莊重嚴肅，公平無私。", type: "term" },
+            { id: 38, question: "生命力", answer: "維持生命活動或發展的能力。", type: "term" },
+            { id: 39, question: "心靈", answer: "人心中本有的智慧、思想和情感等。", type: "term" },
+            { id: 40, question: "病態", answer: "心理上不正常的狀態。", type: "term" },
+            { id: 41, question: "民族性", answer: "一民族所共有的特性。", type: "term" },
+            { id: 42, question: "言簡意賅", answer: "言辭簡練，意思完備。", type: "term" },
+            { id: 43, question: "臘月", answer: "農曆十二月。", type: "term" },
+            { id: 44, question: "以升量石", answer: "指用小的容器測量大的容量。比喻以淺陋的思想揣度高深的道理。", type: "term" },
+            { id: 45, question: "深居簡出", answer: "指居於深密的地方，很少外出。", type: "term" },
+            { id: 46, question: "信誓旦旦", answer: "誓言說得非常誠懇可靠。", type: "term" },
+            { id: 47, question: "秋毫無犯", answer: "一點都不侵犯。", type: "term" },
+            { id: 48, question: "有為有守", answer: "既有作為，又有節操。形容人的完美。", type: "term" },
+            { id: 49, question: "同舟共濟", answer: "比喻同心協力，戰勝困難。", type: "term" },
+            { id: 50, question: "能屈能伸", answer: "失意時能克制忍耐，得意時能施展抱負。", type: "term" },
+            { id: 51, question: "嶔崎磊落", answer: "比喻人品高潔，有骨氣。", type: "term" },
+            { id: 52, question: "茹苦含辛", answer: "形容受盡種種辛苦。", type: "term" },
+            { id: 53, question: "沽名釣譽", answer: "故意做作，用手段謀取名聲和讚譽。", type: "term" },
+            { id: 54, question: "隨波逐流", answer: "比喻人沒有確定的方向和目標，只依從環境、潮流而行動。", type: "term" },
+            { id: 55, question: "行百里者半九十", answer: "行百里路的人，走了九十里，只算走了一半。比喻最後的階段最艱難。", type: "term" },
+            { id: 56, question: "木然", answer: "形容一時痴呆，不知所措的樣子。", type: "term" },
+            { id: 57, question: "歸咎", answer: "把罪惡或錯誤推到某人或某事上。", type: "term" },
+            { id: 58, question: "方圓", answer: "指周圍、附近。", type: "term" },
+            { id: 59, question: "規矩", answer: "本指畫圓畫方的工具，後比喻為法度、禮法。", type: "term" },
+            { id: 60, question: "矛盾", answer: "比喻言語行為自相抵觸。", type: "term" },
+            { id: 61, question: "枷鎖", answer: "古代刑具，後用來比喻束縛、壓迫。", type: "term" },
+            { id: 62, question: "功虧一簣", answer: "比喻事情不能堅持到底，只差最後的步驟而功敗垂成。", type: "term" },
+            { id: 63, question: "鍥而不捨", answer: "比喻堅持到底，奮勉不懈。", type: "term" },
+            { id: 64, question: "休休有容", answer: "形容君子寬宏大量。(適合形容君子無所爭)。", type: "term" },
+            { id: 65, question: "自矜自恃", answer: "自以為是，倚仗自己的勢力。", type: "term" },
+
+            // --- 重要文句部分 ---
+            { id: 66, question: "健全的心靈，寓於健全的身體", answer: "說明健康的身體是健全心靈的基礎，二者關係密切，互為表裡。（引用 (希臘諺語)）", type: "sentence" },
+            { id: 67, question: "運動的精義，還不只此。它更有道德的意義", answer: "將運動從「體育」的範疇提升至「品格教育」的層次。說明培育優良品格比勝敗更重要。（轉折 (承上啟下)）", type: "sentence" },
+            { id: 68, question: "君子無所爭，必也射乎。揖讓而升，下而飲，其爭也君子", answer: "這是行為合宜、進退守禮的「君子之爭」。強調遵守規則，作公平、光明而有禮的競爭。（引用 (論語)、君子之爭、謙讓修養）", type: "sentence" },
+            { id: 69, question: "運動是要守著一定的規律，在萬目睽睽的監視之下，從公開競爭而求得勝利的", answer: "說明運動家應光明正大，不可投機取巧。（君子之爭）", type: "sentence" },
+            { id: 70, question: "君子不怨天，不尤人", answer: "這是「服輸的精神」，也是「反求諸己」、「反躬自省」的態度。輸了只怪自己不行，不怪運氣或別人。（引用 (論語)、服輸的精神、反求諸己）", type: "sentence" },
+            { id: 71, question: "我輸了只怪我自己不行......人家勝了，是他本事好，我只有佩服他", answer: "「服輸」就是「服善」，代表能「欣賞他人」且知「自我反省」的美德。（服輸的精神）", type: "sentence" },
+            { id: 72, question: "罵他不但是無聊，而且是無恥", answer: "強調輸不起、辱罵對手是缺乏風度的表現。（反面論述）", type: "sentence" },
+            { id: 73, question: "羅斯福收到第一個賀電，就是威爾基發的", answer: "表現出「服輸的精神」與「超越勝敗的心胸」。贏者有風度，輸者有氣度。（事例、服輸的精神）", type: "sentence" },
+            { id: 74, question: "威爾基失敗以後，還幫助羅斯福作種種外交活動，一切以國家為前提", answer: "除了服輸精神外，更展現了「公而忘私」的胸襟。（公而忘私、服輸的精神）", type: "sentence" },
+            { id: 75, question: "勝利者和失敗者隔網握手", answer: "代表勝利者有君子風度，失敗者有服輸的精神。(勇於服輸、尊敬對手)。（服輸的精神）", type: "sentence" },
+            { id: 76, question: "勝固欣然，敗亦可喜", answer: "這是「超越勝敗的心胸」。面對比賽光明磊落，無論勝敗都是一種收穫，能達到「得失無動於衷」的境地。（引用 (蘇軾)、超越勝敗、映襯）", type: "sentence" },
+            { id: 77, question: "言必信，行必果", answer: "說明運動家要有「貫徹始終」的精神。絕不臨陣脫逃，不半途而廢。（引用 (論語)、貫徹始終）", type: "sentence" },
+            { id: 78, question: "運動會要舉行宣誓", answer: "表現「貫徹始終」與「言必信，行必果」的精神。（貫徹始終）", type: "sentence" },
+            { id: 79, question: "賽跑落後，無希望得獎，還要努力跑到的人", answer: "表現「貫徹始終」的毅力與「任重道遠」的精神。（貫徹始終、有毅力）", type: "sentence" },
+            { id: 80, question: "有運動家風度的人，寧可有光明的失敗，絕不要不榮譽的成功！", answer: "這是君子風度的表現，贏得的是「人格上的錦標」。強調手段的光明正大比結果的勝負更重要。（映襯、結論）", type: "sentence" },
+            { id: 81, question: "運動家的風度表現在人生上，是一個莊嚴公正、協調進取的人生", answer: "總結全文，將運動精神推廣至人生態度。（總結）", type: "sentence" },
+            { id: 82, question: "任重而道遠", answer: "說明運動家應有長期奮鬥、負重致遠的精神。（引用 (論語)）", type: "sentence" },
+            { id: 83, question: "陶鑄優良的民族性", answer: "運動的道德意義之最高層次（個人→政治→民族）。（層遞 (概念上)）", type: "sentence" },
+            { id: 84, question: "真正的考驗，並不是第一里路，而是旅程最後一里路", answer: "強調堅持到底的重要性。（行百里者半九十）", type: "sentence" },
+            { id: 85, question: "君子欲訥於言，而敏於行", answer: "君子話說得不多，而敏捷勤奮地追求於力行的功夫。（寡言力行）", type: "sentence" },
+            { id: 86, question: "把掌聲留給自己......你的朋友會少一個", answer: "鼓勵人要懂得分享與讚美，讚美對友誼有正面意義。（分享榮耀）", type: "sentence" },
+            { id: 87, question: "無知的狂熱乃是一匹脫韁之馬", answer: "只有熱情而沒有智慧或方向，往往會成事不足，敗事有餘。（成事不足，敗事有餘）", type: "sentence" },
+            { id: 88, question: "不能低頭的人，是因為一再回顧過去的成就", answer: "說明耽溺於昔日輝煌的人，往往容易自誇自大(自矜自恃)。（自矜自恃）", type: "sentence" },
+            { id: 89, question: "我沒辦法決定我的成績如何，但我可以決定我在比賽中的樣子", answer: "(李洋名言) 展現「與其追求勝利，不如全力以赴，享受比賽」的精神。（超越勝敗、享受比賽）", type: "sentence" }
+        ];
+
+        // --- Helper Functions ---
+        
+        const shuffleArray = (array) => {
+          const newArray = [...array];
+          for (let i = newArray.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+          }
+          return newArray;
+        };
+
+        const playSound = (type) => {
+            const audioPath = type === 'success' ? 'sounds/correct.mp3' : 'sounds/fail.mp3';
+            const audio = new Audio(audioPath);
+            audio.play().catch(err => console.log('Audio play error (expected if files missing):', err));
+        }
+
+        const App = () => {
+          const [mode, setMode] = useState('menu'); // menu, study, quiz, favorites, mistakes
+          const [currentUser, setCurrentUser] = useState(null);
+          const [users, setUsers] = useState([]);
+          const [favorites, setFavorites] = useState(new Set());
+          const [mistakes, setMistakes] = useState(new Set());
+
+          // Load users on mount
+          useEffect(() => {
+            try {
+                const storedUsers = JSON.parse(localStorage.getItem(KEY_USERS)) || [];
+                setUsers(storedUsers);
+            } catch (e) {
+                console.error("Error loading users", e);
+            }
+          }, []);
+
+          // Load user data when currentUser changes
+          useEffect(() => {
+            if (currentUser) {
+                try {
+                    // Load Favorites
+                    const favs = JSON.parse(localStorage.getItem(getKeyFavorites(currentUser))) || [];
+                    setFavorites(new Set(favs));
+
+                    // Load Mistakes
+                    const mists = JSON.parse(localStorage.getItem(getKeyMistakes(currentUser))) || [];
+                    setMistakes(new Set(mists));
+                } catch (e) {
+                    console.error("Error loading user data", e);
+                }
+            } else {
+                setFavorites(new Set());
+                setMistakes(new Set());
+            }
+          }, [currentUser]);
+
+          const handleLogin = (name) => {
+            if (!name.trim()) return;
+            const newUsers = Array.from(new Set([name, ...users])); // Add to front, unique
+            setUsers(newUsers);
+            localStorage.setItem(KEY_USERS, JSON.stringify(newUsers));
+            setCurrentUser(name);
+            setMode('menu'); // Ensure we are on menu after login
+          };
+
+          const handleLogout = () => {
+            setCurrentUser(null);
+            setMode('menu');
+          };
+
+          const toggleFavorite = useCallback((id) => {
+            if (!currentUser) return;
+            
+            const newFavorites = new Set(favorites);
+            if (newFavorites.has(id)) {
+                newFavorites.delete(id);
+            } else {
+                newFavorites.add(id);
+            }
+            
+            setFavorites(newFavorites);
+            localStorage.setItem(getKeyFavorites(currentUser), JSON.stringify([...newFavorites]));
+          }, [favorites, currentUser]);
+
+          const addMistake = useCallback((id) => {
+            if (!currentUser) return;
+            
+            const newMistakes = new Set(mistakes);
+            if (!newMistakes.has(id)) {
+                newMistakes.add(id);
+                setMistakes(newMistakes);
+                localStorage.setItem(getKeyMistakes(currentUser), JSON.stringify([...newMistakes]));
+            }
+          }, [mistakes, currentUser]);
+
+          // If no user is logged in, show Login Screen
+          if (!currentUser) {
+            return <LoginView users={users} onLogin={handleLogin} />;
+          }
+          
+          return (
+            <div className="min-h-screen bg-orange-50 text-stone-800 font-sans">
+              {/* Header */}
+              <header className="bg-orange-600 text-white p-4 shadow-lg sticky top-0 z-20">
+                <div className="max-w-4xl mx-auto flex justify-between items-center">
+                  <div 
+                    className="flex items-center space-x-2 cursor-pointer"
+                    onClick={() => setMode('menu')}
+                  >
+                    <BookOpen size={28} />
+                    <h1 className="text-xl md:text-2xl font-bold tracking-wider">第4冊 L1 運動家的風度 注釋練習</h1>
+                  </div>
+                  
+                  <div className="flex items-center space-x-4">
+                    <div className="hidden md:flex items-center bg-orange-700 px-3 py-1 rounded-full text-sm">
+                        <User size={16} className="mr-2"/>
+                        <span className="font-bold truncate max-w-[100px]">{currentUser}</span>
+                    </div>
+                    {mode !== 'menu' && (
+                        <button 
+                        onClick={() => setMode('menu')}
+                        className="text-orange-100 hover:text-white transition font-medium"
+                        >
+                        回首頁
+                        </button>
+                    )}
+                    <button 
+                        onClick={handleLogout}
+                        className="flex items-center text-orange-200 hover:text-white transition"
+                        title="登出"
+                    >
+                        <LogOut size={20} />
+                    </button>
+                  </div>
+                </div>
+              </header>
+
+              {/* Main Content */}
+              <main className="max-w-4xl mx-auto p-4 md:p-6">
+                {mode === 'menu' && (
+                  <div className="flex flex-col items-center justify-center space-y-8 py-12 animate-in fade-in duration-500">
+                    <div className="text-center space-y-4">
+                      <div className="bg-orange-100 p-4 rounded-full inline-block mb-2">
+                        <Brain size={48} className="text-orange-600" />
+                      </div>
+                      <h2 className="text-3xl font-bold text-orange-900">歡迎回來，{currentUser}</h2>
+                      <p className="text-stone-600 text-lg max-w-md">
+                        精準掌握詞語注釋與文句意旨<br/>
+                        共有 {rawData.length} 道精選題目
+                      </p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
+                      <button 
+                        onClick={() => setMode('study')}
+                        className="flex flex-col items-center p-8 bg-white rounded-2xl shadow-sm hover:shadow-xl hover:bg-orange-50 transition border-2 border-orange-100 hover:border-orange-300 group"
+                      >
+                        <div className="bg-orange-100 p-4 rounded-full mb-4 group-hover:scale-110 transition">
+                          <List size={40} className="text-orange-600" />
+                        </div>
+                        <h3 className="text-xl font-bold text-orange-900">全表瀏覽</h3>
+                        <p className="text-stone-500 mt-2">完整檢視注釋對照表</p>
+                      </button>
+
+                      <button 
+                        onClick={() => setMode('quiz')}
+                        className="flex flex-col items-center p-8 bg-white rounded-2xl shadow-sm hover:shadow-xl hover:bg-orange-50 transition border-2 border-orange-100 hover:border-orange-300 group"
+                      >
+                        <div className="bg-orange-100 p-4 rounded-full mb-4 group-hover:scale-110 transition">
+                          <Zap size={40} className="text-orange-600" />
+                        </div>
+                        <h3 className="text-xl font-bold text-orange-900">閃電刷題</h3>
+                        <p className="text-stone-500 mt-2">看解釋猜語詞</p>
+                      </button>
+
+                      <button 
+                        onClick={() => setMode('favorites')}
+                        className="flex flex-col items-center p-8 bg-white rounded-2xl shadow-sm hover:shadow-xl hover:bg-orange-50 transition border-2 border-orange-100 hover:border-orange-300 group"
+                      >
+                        <div className="bg-red-50 p-4 rounded-full mb-4 group-hover:scale-110 transition">
+                          <Heart size={40} className="text-red-500 fill-red-500" />
+                        </div>
+                        <h3 className="text-xl font-bold text-orange-900">我的最愛</h3>
+                        <p className="text-stone-500 mt-2">複習重點收藏題目</p>
+                      </button>
+
+                      <button 
+                        onClick={() => setMode('mistakes')}
+                        className="flex flex-col items-center p-8 bg-white rounded-2xl shadow-sm hover:shadow-xl hover:bg-orange-50 transition border-2 border-orange-100 hover:border-orange-300 group"
+                      >
+                        <div className="bg-stone-100 p-4 rounded-full mb-4 group-hover:scale-110 transition">
+                          <BookX size={40} className="text-stone-600" />
+                        </div>
+                        <h3 className="text-xl font-bold text-orange-900">錯題複習</h3>
+                        <p className="text-stone-500 mt-2">針對答錯題目加強練習</p>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {mode === 'study' && (
+                    <TableView 
+                        data={rawData} 
+                        favorites={favorites} 
+                        onToggleFavorite={toggleFavorite} 
+                        title="注釋或文句一覽表"
+                    />
+                )}
+                
+                {mode === 'favorites' && (
+                    <TableView 
+                        data={rawData.filter(item => favorites.has(item.id))} 
+                        favorites={favorites} 
+                        onToggleFavorite={toggleFavorite} 
+                        title="我的最愛清單"
+                        emptyMessage="您還沒有加入任何最愛題目喔！"
+                    />
+                )}
+
+                {mode === 'mistakes' && (
+                    <TableView 
+                        data={rawData.filter(item => mistakes.has(item.id))} 
+                        favorites={favorites} 
+                        onToggleFavorite={toggleFavorite} 
+                        title="錯題複習本"
+                        emptyMessage="太棒了！目前沒有錯題紀錄。"
+                    />
+                )}
+
+                {mode === 'quiz' && (
+                    <WaterfallQuizView 
+                        data={rawData} 
+                        currentUser={currentUser} 
+                        favorites={favorites}
+                        onToggleFavorite={toggleFavorite}
+                        onAddMistake={addMistake}
+                        onExit={() => setMode('menu')} 
+                    />
+                )}
+              </main>
+            </div>
+          );
+        };
+
+        // --- Login View Component ---
+        const LoginView = ({ users, onLogin }) => {
+            const [inputName, setInputName] = useState("");
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if(inputName.trim()) onLogin(inputName.trim());
+            }
+
+            return (
+                <div className="min-h-screen bg-orange-50 flex items-center justify-center p-4">
+                    <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border-2 border-orange-100">
+                        <div className="text-center mb-8">
+                            <div className="bg-orange-100 p-3 rounded-full inline-block mb-4">
+                                <BookOpen size={40} className="text-orange-600" />
+                            </div>
+                            <h1 className="text-2xl font-bold text-orange-900">運動家的風度 學習App</h1>
+                            <p className="text-stone-500 mt-2">請輸入姓名以開始學習</p>
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <input 
+                                    type="text" 
+                                    value={inputName}
+                                    onChange={(e) => setInputName(e.target.value)}
+                                    placeholder="輸入您的名字"
+                                    className="w-full px-4 py-3 rounded-xl border border-orange-200 focus:outline-none focus:ring-2 focus:ring-orange-400 text-lg"
+                                    autoFocus
+                                />
+                            </div>
+                            <button 
+                                type="submit" 
+                                disabled={!inputName.trim()}
+                                className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-bold text-lg transition disabled:opacity-50"
+                            >
+                                開始使用
+                            </button>
+                        </form>
+
+                        {users.length > 0 && (
+                            <div className="mt-8">
+                                <div className="relative mb-4">
+                                    <div className="absolute inset-0 flex items-center">
+                                        <div className="w-full border-t border-stone-200"></div>
+                                    </div>
+                                    <div className="relative flex justify-center text-sm">
+                                        <span className="px-2 bg-white text-stone-500">快速登入</span>
+                                    </div>
+                                </div>
+                                <div className="flex flex-wrap gap-2 justify-center">
+                                    {users.map((user, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => onLogin(user)}
+                                            className="px-4 py-2 bg-stone-100 hover:bg-orange-100 text-stone-700 hover:text-orange-700 rounded-full text-sm font-medium transition"
+                                        >
+                                            {user}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Table View Component ---
+        const TableView = ({ data, favorites, onToggleFavorite, title, emptyMessage = "沒有找到符合的資料" }) => {
+          const [searchTerm, setSearchTerm] = useState("");
+
+          const filteredData = data.filter(item => 
+            item.question.includes(searchTerm) || 
+            item.answer.includes(searchTerm) ||
+            item.id.toString().includes(searchTerm)
+          );
+
+          return (
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-orange-200 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="p-4 border-b border-orange-100 bg-orange-50 flex flex-col md:flex-row justify-between items-center gap-4">
+                <h2 className="text-xl font-bold text-orange-900 flex items-center">
+                  <List className="mr-2" size={24} />
+                  {title}
+                </h2>
+                <input 
+                  type="text" 
+                  placeholder="搜尋語詞或釋義..." 
+                  className="px-4 py-2 rounded-lg border border-orange-200 focus:outline-none focus:ring-2 focus:ring-orange-400 w-full md:w-64 bg-white"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              
+              <div className="overflow-x-auto max-h-[70vh]">
+                <table className="w-full text-left">
+                  <thead className="bg-orange-100 sticky top-0 z-10 shadow-sm">
+                    <tr>
+                      <th className="p-4 font-black text-orange-900 border-b-2 border-orange-200 w-16 text-center">收藏</th>
+                      <th className="p-4 font-black text-orange-900 border-b-2 border-orange-200 w-16">編號</th>
+                      <th className="p-4 font-black text-orange-900 border-b-2 border-orange-200 w-1/4">語詞 / 文句</th>
+                      <th className="p-4 font-black text-orange-900 border-b-2 border-orange-200">注釋或摘釋</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-orange-50">
+                    {filteredData.length > 0 ? filteredData.map((item) => {
+                      const isFav = favorites.has(item.id);
+                      return (
+                        <tr key={item.id} className="hover:bg-orange-50 transition-colors group">
+                          <td className="p-4 text-center">
+                            <button 
+                                onClick={() => onToggleFavorite(item.id)}
+                                className={`transition transform active:scale-90 p-1 rounded-full hover:bg-orange-100 ${isFav ? 'text-red-500' : 'text-stone-300 hover:text-red-400'}`}
+                            >
+                                <Heart size={20} className={isFav ? "fill-current heart-click" : ""} />
+                            </button>
+                          </td>
+                          <td className="p-4 text-stone-500 font-mono font-medium">{item.id}</td>
+                          <td className="p-4 text-stone-800 text-lg font-medium">{item.question}</td>
+                          <td className="p-4 text-orange-700 text-lg font-bold">{item.answer}</td>
+                        </tr>
+                      );
+                    }) : (
+                      <tr>
+                        <td colSpan="4" className="p-12 text-center text-stone-400 flex flex-col items-center justify-center">
+                            <div className="mb-2 bg-stone-100 p-4 rounded-full">
+                                <List size={32} />
+                            </div>
+                            <p>{emptyMessage}</p>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              <div className="p-3 bg-orange-50 border-t border-orange-200 text-center text-sm text-stone-500">
+                顯示 {filteredData.length} 筆資料
+              </div>
+            </div>
+          );
+        };
+
+        // --- Waterfall Quiz View Component ---
+        const WaterfallQuizView = ({ data, currentUser, favorites, onToggleFavorite, onAddMistake, onExit }) => {
+          // Store the generated quiz data (options shuffled once)
+          const [quizData, setQuizData] = useState([]);
+          // Store user selections: { questionId: selectedOption }
+          const [selections, setSelections] = useState({});
+          
+          const userProgressKey = getKeyProgress(currentUser);
+
+          // Initialize quiz data with dynamic options on mount
+          useEffect(() => {
+            const preparedData = data.map(item => {
+              // 1. Filter other items of the SAME type to be better distractors (term vs sentence)
+              // If not enough items of same type, fallback to all data
+              let otherItems = data.filter(i => i.id !== item.id && i.type === item.type);
+              if (otherItems.length < 3) {
+                 otherItems = data.filter(i => i.id !== item.id);
+              }
+
+              const shuffledOthers = shuffleArray(otherItems);
+              
+              // 2. IMPORTANT CHANGE: Options are now the "Questions" (Terms), not "Answers" (Definitions)
+              const selectedDistractors = shuffledOthers.slice(0, 3).map(i => i.question);
+              
+              // 3. Combine current item's Question (Term) and distractors, then shuffle
+              const options = shuffleArray([item.question, ...selectedDistractors]);
+              
+              return { ...item, options };
+            });
+            setQuizData(preparedData);
+
+            // Load saved progress
+            try {
+                const savedProgress = localStorage.getItem(userProgressKey);
+                if (savedProgress) {
+                    setSelections(JSON.parse(savedProgress));
+                }
+            } catch (e) {
+                console.error("Failed to load progress", e);
+            }
+          }, [data, userProgressKey]);
+
+          const handleSelect = (questionId, option) => {
+            const newSelections = {
+              ...selections,
+              [questionId]: option
+            };
+            setSelections(newSelections);
+            // Save immediately
+            localStorage.setItem(userProgressKey, JSON.stringify(newSelections));
+
+            // Sound and Confetti
+            const currentItem = data.find(item => item.id === questionId);
+            
+            // Logic Check: Did they pick the correct "question" (term) for this "answer" (definition)?
+            const isCorrect = option === currentItem.question;
+
+            if (isCorrect) {
+                playSound('success');
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            } else {
+                playSound('error');
+                // Record mistake
+                onAddMistake(questionId);
+            }
+          };
+          
+          const completedCount = Object.keys(selections).length;
+          const progress = Math.round((completedCount / data.length) * 100);
+
+          return (
+            <div className="max-w-4xl mx-auto pb-20">
+              {/* Sticky Progress Header */}
+              <div className="sticky top-16 z-10 bg-orange-50/95 backdrop-blur-sm pt-4 pb-2 border-b border-orange-200 mb-6 shadow-sm">
+                 <div className="flex justify-between items-center mb-2 px-2">
+                    <div>
+                        <h2 className="text-xl font-bold text-orange-900 flex items-center gap-2">
+                            <Zap size={24} className="fill-orange-500 text-orange-600"/>
+                            閃電刷題
+                        </h2>
+                        <p className="text-xs text-stone-500 mt-1">作答者: {currentUser} | 已完成: {completedCount} / {data.length} 題</p>
+                    </div>
+                    <div className="flex gap-2">
+                        <button 
+                            onClick={() => {
+                                if(window.confirm('確定要重新開始嗎？您將遺失目前的作答紀錄。')) {
+                                    if(window.confirm('再次確認：真的要清空所有進度重來嗎？(此動作無法復原)')) {
+                                        setSelections({});
+                                        localStorage.removeItem(userProgressKey);
+                                        window.scrollTo(0,0);
+                                    }
+                                }
+                            }}
+                            className="px-3 py-1.5 bg-white border border-orange-300 text-orange-700 rounded-lg hover:bg-orange-50 font-medium text-xs sm:text-sm transition"
+                        >
+                            重置進度
+                        </button>
+                        <button 
+                            onClick={onExit}
+                            className="px-3 py-1.5 bg-stone-600 text-white rounded-lg hover:bg-stone-700 font-medium text-xs sm:text-sm transition"
+                        >
+                            暫停離開
+                        </button>
+                    </div>
+                 </div>
+                 {/* Progress Bar */}
+                 <div className="w-full bg-orange-200 h-2.5 rounded-full overflow-hidden">
+                    <div 
+                        className="bg-orange-600 h-2.5 rounded-full progress-bar shadow-[0_0_10px_rgba(249,115,22,0.5)]" 
+                        style={{ width: `${progress}%` }}
+                    ></div>
+                 </div>
+              </div>
+
+              {/* Waterfall List */}
+              <div className="space-y-6">
+                {quizData.map((item) => {
+                    const userSelection = selections[item.id];
+                    const isAnswered = userSelection !== undefined;
+                    // Check against item.question because we swapped the logic
+                    const isCorrect = userSelection === item.question;
+                    const isFav = favorites.has(item.id);
+
+                    return (
+                        <div key={item.id} className={`bg-white rounded-xl shadow-sm border-2 transition-all duration-300 overflow-hidden ${isAnswered ? (isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50') : 'border-orange-100'}`}>
+                            {/* Question Header (NOW SHOWS DEFINITION) */}
+                            <div className="p-4 border-b border-black/5 flex items-start gap-3">
+                                <span className="bg-orange-100 text-orange-800 font-mono font-bold px-2 py-1 rounded text-sm shrink-0 mt-1">
+                                    #{item.id}
+                                </span>
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2">
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onToggleFavorite(item.id);
+                                            }}
+                                            className={`transition transform active:scale-90 p-1 rounded-full -ml-2 ${isFav ? 'text-red-500' : 'text-stone-300 hover:text-red-400'}`}
+                                            title={isFav ? "取消收藏" : "加入最愛"}
+                                        >
+                                            <Heart size={20} className={isFav ? "fill-current heart-click" : ""} />
+                                        </button>
+                                        <h3 className="text-xl md:text-2xl font-bold text-stone-800 leading-snug">
+                                            {/* DISPLAY ANSWER (Definition) AS PROMPT */}
+                                            {item.answer}
+                                        </h3>
+                                    </div>
+                                </div>
+                                {isAnswered && (
+                                    <div className="ml-auto shrink-0">
+                                        {isCorrect ? <CheckCircle className="text-green-500" /> : <XCircle className="text-red-500" />}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Options Row (NOW SHOWS TERMS) */}
+                            <div className="p-4 bg-white/50">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {item.options.map((option, idx) => {
+                                        let btnClass = "py-3 px-4 rounded-lg font-bold text-lg text-left transition-all border-2 relative ";
+                                        
+                                        if (isAnswered) {
+                                            // Compare option (which is a term) with item.question (the correct term)
+                                            if (option === item.question) {
+                                                btnClass += "bg-green-500 text-white border-green-600 shadow-md";
+                                            } else if (option === userSelection && !isCorrect) {
+                                                btnClass += "bg-red-500 text-white border-red-600 shadow-md";
+                                            } else {
+                                                btnClass += "bg-stone-50 text-stone-400 border-transparent opacity-50";
+                                            }
+                                        } else {
+                                            btnClass += "bg-white text-stone-700 border-stone-200 hover:border-orange-400 hover:bg-orange-50 active:scale-95";
+                                        }
+
+                                        return (
+                                            <button
+                                                key={idx}
+                                                onClick={() => !isAnswered && handleSelect(item.id, option)}
+                                                disabled={isAnswered}
+                                                className={btnClass}
+                                            >
+                                                {option}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                                {isAnswered && !isCorrect && (
+                                    <div className="mt-3 text-sm text-red-600 font-medium animate-in fade-in slide-in-from-top-1 bg-red-50 p-2 rounded border border-red-100">
+                                        正確答案：{item.question}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
+              </div>
+
+              {/* Bottom Complete Message */}
+              {progress === 100 && (
+                <div className="mt-8 p-8 bg-green-100 rounded-2xl text-center border-2 border-green-300 animate-in zoom-in duration-300">
+                    <h3 className="text-2xl font-bold text-green-800 mb-2">恭喜完成所有題目！</h3>
+                    <p className="text-green-700">您已經完成了 {data.length} 題的練習。</p>
+                    <button 
+                        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                        className="mt-4 text-green-700 underline hover:text-green-900"
+                    >
+                        回到頂部
+                    </button>
+                </div>
+              )}
+            </div>
+          );
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
