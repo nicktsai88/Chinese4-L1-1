@@ -10,6 +10,7 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
     <!-- Import Map to handle ES Modules for React and Lucide -->
+    <!-- 改用 esm.sh 統一模組來源，解決載入相容性問題 -->
     <script type="importmap">
     {
         "imports": {
@@ -17,9 +18,9 @@
             "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
             "lucide-react": "https://esm.sh/lucide-react@0.263.1",
             "canvas-confetti": "https://esm.sh/canvas-confetti@1.9.2",
-            "firebase/app": "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js",
-            "firebase/auth": "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js",
-            "firebase/firestore": "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"
+            "firebase/app": "https://esm.sh/firebase@10.13.1/app",
+            "firebase/auth": "https://esm.sh/firebase@10.13.1/auth",
+            "firebase/firestore": "https://esm.sh/firebase@10.13.1/firestore"
         }
     }
     </script>
@@ -81,10 +82,45 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        /* Error Display Styles */
+        #error-boundary {
+            display: none;
+            padding: 2rem;
+            text-align: center;
+            background-color: #fef2f2;
+            color: #991b1b;
+            height: 100vh;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
     </style>
 </head>
 <body class="bg-orange-50">
+    <div id="error-boundary">
+        <h2 class="text-2xl font-bold mb-4">⚠️ 應用程式載入失敗</h2>
+        <p class="mb-2">這可能是網路連線不穩或瀏覽器相容性問題。</p>
+        <p id="error-message" class="font-mono bg-red-100 p-2 rounded text-sm mb-4"></p>
+        <button onclick="window.location.reload()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">重新整理頁面</button>
+    </div>
+
     <div id="root"></div>
+
+    <!-- Error Handler Script -->
+    <script>
+        window.onerror = function(msg, url, line, col, error) {
+            const errorBoundary = document.getElementById('error-boundary');
+            const errorMessage = document.getElementById('error-message');
+            const root = document.getElementById('root');
+            
+            if (errorBoundary && errorMessage) {
+                errorBoundary.style.display = 'flex';
+                root.style.display = 'none';
+                errorMessage.textContent = `${msg} (Line: ${line})`;
+            }
+            return false;
+        };
+    </script>
 
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
@@ -95,19 +131,31 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from 'firebase/auth';
         import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot } from 'firebase/firestore';
 
-        // --- Firebase Configuration & Initialization ---
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // --- Firebase Configuration & Initialization (Safe Wrap) ---
+        let app, auth, db, appId;
+        try {
+            if (typeof __firebase_config === 'undefined') {
+                throw new Error("找不到 Firebase 設定 (__firebase_config is missing)");
+            }
+            // Handle both string and object formats for safety
+            const firebaseConfig = typeof __firebase_config === 'string' 
+                ? JSON.parse(__firebase_config) 
+                : __firebase_config;
+                
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        } catch (e) {
+            console.error("Firebase Init Failed:", e);
+            throw new Error("雲端資料庫初始化失敗: " + e.message);
+        }
 
         // STORAGE KEYS (Local Only for caching recent users list)
         const LOCAL_STORAGE_PREFIX = 'Chinese4-L1-1_Local';
         const KEY_LOCAL_USERS = `${LOCAL_STORAGE_PREFIX}_recent_users`;
 
         // FIRESTORE COLLECTIONS
-        // We use a public data collection keyed by "Student Name" to simulate a simple login
         const COLLECTION_NAME = 'student_progress_l1';
 
         // 注釋或摘釋完整資料庫 - 第4冊 L1 運動家的風度
@@ -178,7 +226,6 @@
             { id: 63, question: "鍥而不捨", zhuyin: "ㄑㄧㄝˋ ㄦˊ ㄅㄨˋ ㄕㄜˇ", answer: "比喻堅持到底，奮勉不懈。", type: "term" },
             { id: 64, question: "休休有容", zhuyin: "ㄒㄧㄡ ㄒㄧㄡ ㄧㄡˇ ㄖㄨㄥˊ", answer: "形容君子寬宏大量。(適合形容君子無所爭)。", type: "term" },
             { id: 65, question: "自矜自恃", zhuyin: "ㄗˋ ㄐㄧㄣ ㄗˋ ㄕˋ", answer: "自以為是，倚仗自己的勢力。", type: "term" },
-            // ... (其他資料保持不變)
             // --- 重要文句部分 ---
             { id: 66, question: "健全的心靈，寓於健全的身體", answer: "說明健康的身體是健全心靈的基礎，二者關係密切，互為表裡。（引用 (希臘諺語)）", type: "sentence" },
             { id: 67, question: "運動的精義，還不只此。它更有道德的意義", answer: "將運動從「體育」的範疇提升至「品格教育」的層次。說明培育優良品格比勝敗更重要。（轉折 (承上啟下)）", type: "sentence" },
@@ -249,7 +296,7 @@
                     }
                 } catch (error) {
                     console.error("Auth failed:", error);
-                    setAuthError("無法連接雲端伺服器，請檢查網路連線");
+                    setAuthError("無法連接雲端伺服器: " + error.message);
                 }
             };
             initAuth();
@@ -276,8 +323,6 @@
             setIsLoading(true);
             
             // Path: artifacts/{appId}/public/data/{COLLECTION_NAME}/{userName}
-            // Note: We use "public/data" keyed by userName to allow sharing across devices simply by name.
-            // Using sanitize name for doc ID
             const safeDocId = currentUser.trim().replace(/[/#\?]/g, '_'); 
             const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', COLLECTION_NAME, safeDocId);
 
@@ -297,7 +342,7 @@
             }, (error) => {
                 console.error("Firestore sync error:", error);
                 setIsLoading(false);
-                setAuthError("讀取雲端資料失敗");
+                setAuthError("讀取雲端資料失敗: " + error.message);
             });
 
             return () => unsubscribe();
