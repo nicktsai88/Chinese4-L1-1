@@ -116,12 +116,13 @@
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useMemo, useCallback } from 'react';
         import { createRoot } from 'react-dom/client';
-        import { BookOpen, HelpCircle, CheckCircle, XCircle, ArrowRight, RefreshCcw, List, Sun, User, LogOut, Zap, Heart, BookX, Brain, Cloud, CloudOff, Wifi, WifiOff } from 'lucide-react';
+        import { BookOpen, HelpCircle, CheckCircle, XCircle, ArrowRight, RefreshCcw, List, Sun, User, LogOut, Zap, Heart, BookX, Brain, Cloud, CloudOff, Wifi, WifiOff, Trash2 } from 'lucide-react';
         import confetti from 'canvas-confetti';
         
         // --- FIREBASE IMPORTS ---
         import { initializeApp } from 'firebase/app';
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, onSnapshot, collection } from 'firebase/firestore';
+        // Note: Added arrayRemove and deleteDoc for deletion feature
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, deleteDoc, onSnapshot, collection } from 'firebase/firestore';
         import { getAuth, signInAnonymously } from 'firebase/auth';
 
         // ------------------------------------------------------------------
@@ -404,6 +405,50 @@
             setIsLoading(false);
           };
 
+          // Handle User Deletion
+          const handleDeleteUser = async (name) => {
+             // Double Confirmation
+            if (!window.confirm(`確定要刪除使用者 "${name}" 嗎？\n注意：此動作無法復原，所有學習紀錄將被永久刪除。`)) return;
+            if (!window.confirm(`再次確認：真的要永久刪除 "${name}" 的所有資料嗎？`)) return;
+
+            setIsLoading(true);
+            updateConnectionStatus('loading');
+
+            try {
+                if (isFirebaseReady) {
+                    // 1. Remove from global list
+                    const globalRef = doc(db, COLLECTION_NAME, DOC_GLOBAL);
+                    await updateDoc(globalRef, {
+                        users: arrayRemove(name)
+                    });
+
+                    // 2. Delete user document
+                    const userRef = doc(db, COLLECTION_NAME, `user_${name}`);
+                    await deleteDoc(userRef);
+                } else {
+                    // LocalStorage cleanup
+                    localStorage.removeItem(`${COLLECTION_NAME}_progress_${name}`);
+                }
+
+                // Update local state and localStorage for user list
+                const newUsers = users.filter(u => u !== name);
+                setUsers(newUsers);
+                
+                // If offline/local mode, update that storage too
+                if (!isFirebaseReady) {
+                     localStorage.setItem(`${COLLECTION_NAME}_users`, JSON.stringify(newUsers));
+                }
+
+                updateConnectionStatus('success');
+            } catch (e) {
+                console.error("Error deleting user:", e);
+                alert("刪除失敗，請檢查網路連線");
+                updateConnectionStatus('error');
+            } finally {
+                setIsLoading(false);
+            }
+          };
+
           const handleLogout = () => {
             setCurrentUser(null);
             setMode('menu');
@@ -464,6 +509,7 @@
                 <LoginView 
                     users={users} 
                     onLogin={handleLogin} 
+                    onDeleteUser={handleDeleteUser}
                     isConfigured={isFirebaseConfigured} 
                     isLoading={isLoading}
                     connectionStatus={connectionStatus}
@@ -658,7 +704,7 @@
         };
 
         // --- Login View Component ---
-        const LoginView = ({ users, onLogin, isConfigured, isLoading, connectionStatus }) => {
+        const LoginView = ({ users, onLogin, onDeleteUser, isConfigured, isLoading, connectionStatus }) => {
             const [inputName, setInputName] = useState("");
 
             const handleSubmit = (e) => {
@@ -748,14 +794,26 @@
                             {users.length > 0 ? (
                                 <div className="flex flex-wrap gap-2 justify-center max-h-32 overflow-y-auto">
                                     {users.map((user, idx) => (
-                                        <button
-                                            key={idx}
-                                            onClick={() => onLogin(user)}
-                                            disabled={isLoading}
-                                            className="px-4 py-2 bg-stone-100 hover:bg-orange-100 text-stone-700 hover:text-orange-700 rounded-full text-sm font-medium transition"
-                                        >
-                                            {user}
-                                        </button>
+                                        <div key={idx} className="group flex items-center bg-stone-100 hover:bg-orange-100 rounded-full transition border border-transparent hover:border-orange-200 pr-1">
+                                            <button
+                                                onClick={() => onLogin(user)}
+                                                disabled={isLoading}
+                                                className="px-4 py-2 text-stone-700 hover:text-orange-700 text-sm font-medium rounded-l-full"
+                                            >
+                                                {user}
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onDeleteUser(user);
+                                                }}
+                                                disabled={isLoading}
+                                                className="p-1.5 rounded-full text-stone-300 hover:text-red-500 hover:bg-red-50 transition"
+                                                title="刪除使用者"
+                                            >
+                                                <XCircle size={16} />
+                                            </button>
+                                        </div>
                                     ))}
                                 </div>
                             ) : (
