@@ -3,23 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>第4冊 L1 運動家的風度 注釋練習 (雲端版)</title>
+    <title>第4冊 L1 運動家的風度 注釋練習</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- Import Map: 加入 Firebase 模組 -->
+    <!-- Import Map to handle ES Modules for React and Lucide -->
     <script type="importmap">
     {
         "imports": {
             "react": "https://esm.sh/react@18.2.0",
             "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
             "lucide-react": "https://esm.sh/lucide-react@0.263.1",
-            "canvas-confetti": "https://esm.sh/canvas-confetti@1.9.2",
-            "firebase/app": "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js",
-            "firebase/firestore": "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js",
-            "firebase/auth": "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"
+            "canvas-confetti": "https://esm.sh/canvas-confetti@1.9.2"
         }
     }
     </script>
@@ -40,6 +37,7 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #fb923c; 
         }
+        /* Hide scrollbar for clean horizontal scroll if needed */
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -47,9 +45,11 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+        /* Progress bar transition */
         .progress-bar {
             transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        /* Heart animation */
         @keyframes heartbeat {
             0% { transform: scale(1); }
             25% { transform: scale(1.2); }
@@ -65,19 +65,6 @@
             font-family: "Bopomofo", system-ui, -apple-system, sans-serif;
             color: #ea580c; /* orange-600 */
         }
-        /* Loading Spinner */
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #ea580c;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
     </style>
 </head>
 <body class="bg-orange-50">
@@ -86,50 +73,21 @@
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useMemo, useCallback } from 'react';
         import { createRoot } from 'react-dom/client';
-        import { BookOpen, HelpCircle, CheckCircle, XCircle, ArrowRight, RefreshCcw, List, Sun, User, LogOut, Zap, Heart, BookX, Brain, Cloud, CloudOff } from 'lucide-react';
+        import { BookOpen, HelpCircle, CheckCircle, XCircle, ArrowRight, RefreshCcw, List, Sun, User, LogOut, Zap, Heart, BookX, Brain } from 'lucide-react';
         import confetti from 'canvas-confetti';
+
+        // STORAGE KEYS - Updated prefix for new lesson
+        const STORAGE_PREFIX = 'Chinese4-L1-1';
+        const KEY_USERS = `${STORAGE_PREFIX}_users`;
         
-        // --- FIREBASE IMPORTS ---
-        import { initializeApp } from 'firebase/app';
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, onSnapshot, collection } from 'firebase/firestore';
-        import { getAuth, signInAnonymously } from 'firebase/auth';
-
-        // ------------------------------------------------------------------
-        // ★★★ 請在此處填入您的 FIREBASE 設定 (從 Firebase Console 複製) ★★★
-        // ------------------------------------------------------------------
-        const firebaseConfig = {
-  apiKey: "AIzaSyAxQFt76ZPXE7d0i1XeNZ1yiiD2WYNIfHs",
-  authDomain: "chinese-learning-47f4d.firebaseapp.com",
-  projectId: "chinese-learning-47f4d",
-  storageBucket: "chinese-learning-47f4d.firebasestorage.app",
-  messagingSenderId: "76289812052",
-  appId: "1:76289812052:web:898384a916f9f341f62fc1"
-};
-
-        // Initialize Firebase
-        let db;
-        let auth;
-        let isFirebaseReady = false;
-
-        try {
-            // 簡單檢查是否有填寫 config，避免直接報錯
-            if (firebaseConfig.apiKey !== "請填入您的API_KEY") {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                isFirebaseReady = true;
-            } else {
-                console.warn("尚未設定 Firebase Config，請參閱教學設定。");
-            }
-        } catch (e) {
-            console.error("Firebase Initialization Error:", e);
-        }
-
-        // COLLECTION REFERENCES
-        const COLLECTION_NAME = 'Chinese4-L1-1'; // 主集合名稱
-        const DOC_GLOBAL = 'global_metadata';    // 存放使用者列表的文件ID
+        // Helper to get dynamic keys
+        const getKeyFavorites = (user) => `${STORAGE_PREFIX}_fav_${user}`;
+        const getKeyMistakes = (user) => `${STORAGE_PREFIX}_mistake_${user}`;
+        const getKeyProgress = (user) => `${STORAGE_PREFIX}_progress_${user}`;
 
         // 注釋或摘釋完整資料庫 - 第4冊 L1 運動家的風度
+        // id 1-65: 語詞
+        // id 66-89: 文句
         const rawData = [
             // --- 語詞部分 ---
             { id: 1, question: "陶鑄", zhuyin: "ㄊㄠˊ ㄓㄨˋ", answer: "原指將金屬鎔化倒入陶製模型中冷卻凝固，做成各種器物。文中比喻造就、培育。", type: "term" },
@@ -197,7 +155,7 @@
             { id: 63, question: "鍥而不捨", zhuyin: "ㄑㄧㄝˋ ㄦˊ ㄅㄨˋ ㄕㄜˇ", answer: "比喻堅持到底，奮勉不懈。", type: "term" },
             { id: 64, question: "休休有容", zhuyin: "ㄒㄧㄡ ㄒㄧㄡ ㄧㄡˇ ㄖㄨㄥˊ", answer: "形容君子寬宏大量。(適合形容君子無所爭)。", type: "term" },
             { id: 65, question: "自矜自恃", zhuyin: "ㄗˋ ㄐㄧㄣ ㄗˋ ㄕˋ", answer: "自以為是，倚仗自己的勢力。", type: "term" },
-            
+
             // --- 重要文句部分 ---
             { id: 66, question: "健全的心靈，寓於健全的身體", answer: "說明健康的身體是健全心靈的基礎，二者關係密切，互為表裡。（引用 (希臘諺語)）", type: "sentence" },
             { id: 67, question: "運動的精義，還不只此。它更有道德的意義", answer: "將運動從「體育」的範疇提升至「品格教育」的層次。說明培育優良品格比勝敗更重要。（轉折 (承上啟下)）", type: "sentence" },
@@ -248,112 +206,44 @@
           const [users, setUsers] = useState([]);
           const [favorites, setFavorites] = useState(new Set());
           const [mistakes, setMistakes] = useState(new Set());
-          const [isFirebaseConfigured, setIsFirebaseConfigured] = useState(false);
-          const [isLoading, setIsLoading] = useState(false); // Global Loading State
 
-          // Check Firebase Config
+          // Load users on mount
           useEffect(() => {
-              setIsFirebaseConfigured(isFirebaseReady);
-              if (isFirebaseReady) {
-                  // 初始化匿名登入，確保有權限讀寫資料
-                  const loginAnon = async () => {
-                      try {
-                          await signInAnonymously(auth);
-                          console.log("Firebase Anonymous Auth Success");
-                          fetchUsersList();
-                      } catch (err) {
-                          console.error("Auth Error", err);
-                      }
-                  };
-                  loginAnon();
-              } else {
-                  // Fallback: load from local if firebase not ready (for demo only)
-                  const storedUsers = JSON.parse(localStorage.getItem(`${COLLECTION_NAME}_users`)) || [];
-                  setUsers(storedUsers);
-              }
+            try {
+                const storedUsers = JSON.parse(localStorage.getItem(KEY_USERS)) || [];
+                setUsers(storedUsers);
+            } catch (e) {
+                console.error("Error loading users", e);
+            }
           }, []);
 
-          // Fetch Global User List from Firestore
-          const fetchUsersList = async () => {
-              if (!db) return;
-              try {
-                  const docRef = doc(db, COLLECTION_NAME, DOC_GLOBAL);
-                  const docSnap = await getDoc(docRef);
-                  if (docSnap.exists()) {
-                      setUsers(docSnap.data().users || []);
-                  } else {
-                      // First time setup: create the document
-                      await setDoc(docRef, { users: [] });
-                      setUsers([]);
-                  }
-              } catch (e) {
-                  console.error("Error fetching users list:", e);
-              }
-          };
-
-          // Load user data when currentUser changes (Firestore)
+          // Load user data when currentUser changes
           useEffect(() => {
-            if (currentUser && db) {
-                setIsLoading(true);
-                const userDocRef = doc(db, COLLECTION_NAME, `user_${currentUser}`);
-                
-                // Real-time listener for user data
-                const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        setFavorites(new Set(data.favorites || []));
-                        setMistakes(new Set(data.mistakes || []));
-                        // Quiz selections handled in QuizView via props or separate logic, 
-                        // but for simplicity we load favs/mistakes here.
-                    } else {
-                        // New user document
-                        setFavorites(new Set());
-                        setMistakes(new Set());
-                    }
-                    setIsLoading(false);
-                }, (error) => {
-                    console.error("Error listening to user data:", error);
-                    setIsLoading(false);
-                });
+            if (currentUser) {
+                try {
+                    // Load Favorites
+                    const favs = JSON.parse(localStorage.getItem(getKeyFavorites(currentUser))) || [];
+                    setFavorites(new Set(favs));
 
-                return () => unsubscribe();
-            } else if (!currentUser) {
+                    // Load Mistakes
+                    const mists = JSON.parse(localStorage.getItem(getKeyMistakes(currentUser))) || [];
+                    setMistakes(new Set(mists));
+                } catch (e) {
+                    console.error("Error loading user data", e);
+                }
+            } else {
                 setFavorites(new Set());
                 setMistakes(new Set());
             }
           }, [currentUser]);
 
-          const handleLogin = async (name) => {
+          const handleLogin = (name) => {
             if (!name.trim()) return;
-            
-            setIsLoading(true);
-            
-            if (isFirebaseReady) {
-                try {
-                    // Update Global User List if new
-                    if (!users.includes(name)) {
-                        const globalRef = doc(db, COLLECTION_NAME, DOC_GLOBAL);
-                        await updateDoc(globalRef, {
-                            users: arrayUnion(name)
-                        });
-                        setUsers(prev => [...prev, name]);
-                    }
-                } catch (e) {
-                    console.error("Error updating user list:", e);
-                    alert("連線錯誤，無法建立使用者，請檢查網路或 Firebase 設定");
-                    setIsLoading(false);
-                    return;
-                }
-            } else {
-                // LocalStorage Fallback
-                const newUsers = Array.from(new Set([name, ...users]));
-                setUsers(newUsers);
-                localStorage.setItem(`${COLLECTION_NAME}_users`, JSON.stringify(newUsers));
-            }
-
+            const newUsers = Array.from(new Set([name, ...users])); // Add to front, unique
+            setUsers(newUsers);
+            localStorage.setItem(KEY_USERS, JSON.stringify(newUsers));
             setCurrentUser(name);
             setMode('menu'); // Ensure we are on menu after login
-            setIsLoading(false);
           };
 
           const handleLogout = () => {
@@ -361,8 +251,7 @@
             setMode('menu');
           };
 
-          // Save Favorites to Firestore
-          const toggleFavorite = useCallback(async (id) => {
+          const toggleFavorite = useCallback((id) => {
             if (!currentUser) return;
             
             const newFavorites = new Set(favorites);
@@ -371,49 +260,25 @@
             } else {
                 newFavorites.add(id);
             }
-            setFavorites(newFavorites); // Optimistic UI update
-
-            if (isFirebaseReady) {
-                try {
-                    const userRef = doc(db, COLLECTION_NAME, `user_${currentUser}`);
-                    // merge: true ensures we don't overwrite quiz progress
-                    await setDoc(userRef, { favorites: [...newFavorites] }, { merge: true });
-                } catch (e) {
-                    console.error("Error saving favorites:", e);
-                }
-            }
+            
+            setFavorites(newFavorites);
+            localStorage.setItem(getKeyFavorites(currentUser), JSON.stringify([...newFavorites]));
           }, [favorites, currentUser]);
 
-          // Save Mistakes to Firestore
-          const addMistake = useCallback(async (id) => {
+          const addMistake = useCallback((id) => {
             if (!currentUser) return;
             
             const newMistakes = new Set(mistakes);
             if (!newMistakes.has(id)) {
                 newMistakes.add(id);
-                setMistakes(newMistakes); // Optimistic UI update
-
-                if (isFirebaseReady) {
-                    try {
-                        const userRef = doc(db, COLLECTION_NAME, `user_${currentUser}`);
-                        await setDoc(userRef, { mistakes: [...newMistakes] }, { merge: true });
-                    } catch (e) {
-                        console.error("Error saving mistakes:", e);
-                    }
-                }
+                setMistakes(newMistakes);
+                localStorage.setItem(getKeyMistakes(currentUser), JSON.stringify([...newMistakes]));
             }
           }, [mistakes, currentUser]);
 
           // If no user is logged in, show Login Screen
           if (!currentUser) {
-            return (
-                <LoginView 
-                    users={users} 
-                    onLogin={handleLogin} 
-                    isConfigured={isFirebaseConfigured} 
-                    isLoading={isLoading}
-                />
-            );
+            return <LoginView users={users} onLogin={handleLogin} />;
           }
           
           return (
@@ -426,14 +291,13 @@
                     onClick={() => setMode('menu')}
                   >
                     <BookOpen size={28} />
-                    <h1 className="text-xl md:text-2xl font-bold tracking-wider">第4冊 L1 運動家的風度</h1>
+                    <h1 className="text-xl md:text-2xl font-bold tracking-wider">第4冊 L1 運動家的風度 注釋練習</h1>
                   </div>
                   
                   <div className="flex items-center space-x-4">
                     <div className="hidden md:flex items-center bg-orange-700 px-3 py-1 rounded-full text-sm">
                         <User size={16} className="mr-2"/>
                         <span className="font-bold truncate max-w-[100px]">{currentUser}</span>
-                        {isLoading && <div className="ml-2 w-3 h-3 bg-white rounded-full animate-pulse"></div>}
                     </div>
                     {mode !== 'menu' && (
                         <button 
@@ -463,12 +327,6 @@
                         <Brain size={48} className="text-orange-600" />
                       </div>
                       <h2 className="text-3xl font-bold text-orange-900">歡迎回來，{currentUser}</h2>
-                      <div className="flex justify-center items-center space-x-2 text-stone-500">
-                         {isFirebaseReady ? 
-                            <span className="flex items-center text-green-600 text-sm"><Cloud size={16} className="mr-1"/> 雲端同步中</span> : 
-                            <span className="flex items-center text-stone-400 text-sm"><CloudOff size={16} className="mr-1"/> 本機模式</span>
-                         }
-                      </div>
                       <p className="text-stone-600 text-lg max-w-md">
                         精準掌握詞語注釋與文句意旨<br/>
                         共有 {rawData.length} 道精選題目
@@ -560,9 +418,6 @@
                         onToggleFavorite={toggleFavorite}
                         onAddMistake={addMistake}
                         onExit={() => setMode('menu')} 
-                        db={db}
-                        isFirebaseReady={isFirebaseReady}
-                        collectionName={COLLECTION_NAME}
                     />
                 )}
               </main>
@@ -571,7 +426,7 @@
         };
 
         // --- Login View Component ---
-        const LoginView = ({ users, onLogin, isConfigured, isLoading }) => {
+        const LoginView = ({ users, onLogin }) => {
             const [inputName, setInputName] = useState("");
 
             const handleSubmit = (e) => {
@@ -581,17 +436,12 @@
 
             return (
                 <div className="min-h-screen bg-orange-50 flex items-center justify-center p-4">
-                    <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border-2 border-orange-100 relative">
-                        {!isConfigured && (
-                            <div className="absolute top-0 left-0 w-full bg-red-100 text-red-700 text-xs text-center p-1 rounded-t-xl">
-                                尚未設定 Firebase Config - 僅使用本機儲存
-                            </div>
-                        )}
-                        <div className="text-center mb-8 mt-2">
+                    <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border-2 border-orange-100">
+                        <div className="text-center mb-8">
                             <div className="bg-orange-100 p-3 rounded-full inline-block mb-4">
                                 <BookOpen size={40} className="text-orange-600" />
                             </div>
-                            <h1 className="text-2xl font-bold text-orange-900">第4冊 L1 運動家的風度</h1>
+                            <h1 className="text-2xl font-bold text-orange-900">第4冊 L1 運動家的風度 注釋練習</h1>
                             <p className="text-stone-500 mt-2">請輸入姓名以開始學習</p>
                         </div>
 
@@ -604,17 +454,14 @@
                                     placeholder="輸入您的名字"
                                     className="w-full px-4 py-3 rounded-xl border border-orange-200 focus:outline-none focus:ring-2 focus:ring-orange-400 text-lg"
                                     autoFocus
-                                    disabled={isLoading}
                                 />
                             </div>
                             <button 
                                 type="submit" 
-                                disabled={!inputName.trim() || isLoading}
-                                className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-bold text-lg transition disabled:opacity-50 flex justify-center items-center"
+                                disabled={!inputName.trim()}
+                                className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-bold text-lg transition disabled:opacity-50"
                             >
-                                {isLoading ? (
-                                    <div className="spinner w-6 h-6 border-2 border-white border-t-transparent"></div>
-                                ) : "開始使用"}
+                                開始使用
                             </button>
                         </form>
 
@@ -628,12 +475,11 @@
                                         <span className="px-2 bg-white text-stone-500">快速登入</span>
                                     </div>
                                 </div>
-                                <div className="flex flex-wrap gap-2 justify-center max-h-32 overflow-y-auto">
+                                <div className="flex flex-wrap gap-2 justify-center">
                                     {users.map((user, idx) => (
                                         <button
                                             key={idx}
                                             onClick={() => onLogin(user)}
-                                            disabled={isLoading}
                                             className="px-4 py-2 bg-stone-100 hover:bg-orange-100 text-stone-700 hover:text-orange-700 rounded-full text-sm font-medium transition"
                                         >
                                             {user}
@@ -724,19 +570,25 @@
         };
 
         // --- Waterfall Quiz View Component ---
-        const WaterfallQuizView = ({ data, currentUser, favorites, onToggleFavorite, onAddMistake, onExit, db, isFirebaseReady, collectionName }) => {
+        const WaterfallQuizView = ({ data, currentUser, favorites, onToggleFavorite, onAddMistake, onExit }) => {
+          // Store the generated quiz data (options shuffled once)
           const [quizData, setQuizData] = useState([]);
+          // Store user selections: { questionId: selectedOption }
           const [selections, setSelections] = useState({});
-          const [isSaving, setIsSaving] = useState(false);
           
+          const userProgressKey = getKeyProgress(currentUser);
+
           // Initialize quiz data with dynamic options on mount
           useEffect(() => {
+            // SHUFFLE DATA FIRST (Randomized Question Order)
             const shuffledRawData = shuffleArray(data);
 
             const preparedData = shuffledRawData.map(item => {
               // INTELLIGENT DISTRACTOR LOGIC
+              // 1. Filter items of same type
               let candidates = data.filter(i => i.id !== item.id && i.type === item.type);
               
+              // 2. Sort candidates by length difference (Closer length = Better distractor)
               const targetLen = item.question.length;
               candidates.sort((a, b) => {
                   const diffA = Math.abs(a.question.length - targetLen);
@@ -744,66 +596,50 @@
                   return diffA - diffB;
               });
 
+              // 3. Take top 10 closest length candidates to shuffle from
               let topCandidates = candidates.slice(0, 10);
+              
+              // If not enough candidates, fallback to random other items
               if (topCandidates.length < 3) {
                  topCandidates = data.filter(i => i.id !== item.id);
               }
               
               const shuffledOthers = shuffleArray(topCandidates);
+              
+              // 4. Options are the "Questions" (Terms)
               const selectedDistractors = shuffledOthers.slice(0, 3).map(i => i.question);
+              
+              // 5. Combine current item's Question (Term) and distractors, then shuffle
               const options = shuffleArray([item.question, ...selectedDistractors]);
               
               return { ...item, options };
             });
             setQuizData(preparedData);
 
-            // Load saved progress from Firestore
-            const loadProgress = async () => {
-                if (isFirebaseReady && db && currentUser) {
-                     try {
-                        const userDocRef = doc(db, collectionName, `user_${currentUser}`);
-                        const docSnap = await getDoc(userDocRef);
-                        if(docSnap.exists() && docSnap.data().quizProgress) {
-                            setSelections(docSnap.data().quizProgress);
-                        }
-                    } catch (e) {
-                        console.error("Error loading progress", e);
-                    }
-                } else {
-                    // Fallback to local
-                     try {
-                        const savedProgress = localStorage.getItem(`${collectionName}_progress_${currentUser}`);
-                        if (savedProgress) {
-                            setSelections(JSON.parse(savedProgress));
-                        }
-                    } catch (e) {}
+            // Load saved progress
+            try {
+                const savedProgress = localStorage.getItem(userProgressKey);
+                if (savedProgress) {
+                    setSelections(JSON.parse(savedProgress));
                 }
-            };
-            loadProgress();
-            
-          }, [data, db, currentUser, isFirebaseReady, collectionName]);
+            } catch (e) {
+                console.error("Failed to load progress", e);
+            }
+          }, [data, userProgressKey]);
 
-          const handleSelect = async (questionId, option) => {
+          const handleSelect = (questionId, option) => {
             const newSelections = {
               ...selections,
               [questionId]: option
             };
             setSelections(newSelections);
-            
-            // Save Progress (Firestore)
-            if (isFirebaseReady) {
-                try {
-                    const userRef = doc(db, collectionName, `user_${currentUser}`);
-                    await setDoc(userRef, { quizProgress: newSelections }, { merge: true });
-                } catch(e) {
-                    console.error("Failed to save progress", e);
-                }
-            } else {
-                localStorage.setItem(`${collectionName}_progress_${currentUser}`, JSON.stringify(newSelections));
-            }
+            // Save immediately
+            localStorage.setItem(userProgressKey, JSON.stringify(newSelections));
 
-            // Sound and Confetti logic
+            // Sound and Confetti
             const currentItem = data.find(item => item.id === questionId);
+            
+            // Logic Check: Did they pick the correct "question" (term) for this "answer" (definition)?
             const isCorrect = option === currentItem.question;
 
             if (isCorrect) {
@@ -815,6 +651,7 @@
                 });
             } else {
                 playSound('error');
+                // Record mistake
                 onAddMistake(questionId);
             }
           };
@@ -836,17 +673,11 @@
                     </div>
                     <div className="flex gap-2">
                         <button 
-                            onClick={async () => {
+                            onClick={() => {
                                 if(window.confirm('確定要重新開始嗎？您將遺失目前的作答紀錄。')) {
                                     if(window.confirm('再次確認：真的要清空所有進度重來嗎？(此動作無法復原)')) {
                                         setSelections({});
-                                        // Clear Cloud Progress
-                                        if (isFirebaseReady) {
-                                            const userRef = doc(db, collectionName, `user_${currentUser}`);
-                                            await updateDoc(userRef, { quizProgress: {} });
-                                        } else {
-                                            localStorage.removeItem(`${collectionName}_progress_${currentUser}`);
-                                        }
+                                        localStorage.removeItem(userProgressKey);
                                         window.scrollTo(0,0);
                                     }
                                 }
@@ -863,6 +694,7 @@
                         </button>
                     </div>
                  </div>
+                 {/* Progress Bar */}
                  <div className="w-full bg-orange-200 h-2.5 rounded-full overflow-hidden">
                     <div 
                         className="bg-orange-600 h-2.5 rounded-full progress-bar shadow-[0_0_10px_rgba(249,115,22,0.5)]" 
@@ -876,12 +708,13 @@
                 {quizData.map((item) => {
                     const userSelection = selections[item.id];
                     const isAnswered = userSelection !== undefined;
+                    // Check against item.question because we swapped the logic
                     const isCorrect = userSelection === item.question;
                     const isFav = favorites.has(item.id);
 
                     return (
                         <div key={item.id} className={`bg-white rounded-xl shadow-sm border-2 transition-all duration-300 overflow-hidden ${isAnswered ? (isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50') : 'border-orange-100'}`}>
-                            {/* Question Header */}
+                            {/* Question Header (NOW SHOWS DEFINITION) */}
                             <div className="p-4 border-b border-black/5 flex items-start gap-3">
                                 <span className="bg-orange-100 text-orange-800 font-mono font-bold px-2 py-1 rounded text-sm shrink-0 mt-1">
                                     #{item.id}
@@ -899,6 +732,7 @@
                                             <Heart size={20} className={isFav ? "fill-current heart-click" : ""} />
                                         </button>
                                         <h3 className="text-xl md:text-2xl font-bold text-stone-800 leading-snug">
+                                            {/* DISPLAY ANSWER (Definition) AS PROMPT */}
                                             {item.answer}
                                         </h3>
                                     </div>
@@ -910,13 +744,14 @@
                                 )}
                             </div>
 
-                            {/* Options Row */}
+                            {/* Options Row (NOW SHOWS TERMS) */}
                             <div className="p-4 bg-white/50">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     {item.options.map((option, idx) => {
                                         let btnClass = "py-3 px-4 rounded-lg font-bold text-lg text-left transition-all border-2 relative ";
                                         
                                         if (isAnswered) {
+                                            // Compare option (which is a term) with item.question (the correct term)
                                             if (option === item.question) {
                                                 btnClass += "bg-green-500 text-white border-green-600 shadow-md";
                                             } else if (option === userSelection && !isCorrect) {
@@ -951,6 +786,7 @@
                 })}
               </div>
 
+              {/* Bottom Complete Message */}
               {progress === 100 && (
                 <div className="mt-8 p-8 bg-green-100 rounded-2xl text-center border-2 border-green-300 animate-in zoom-in duration-300">
                     <h3 className="text-2xl font-bold text-green-800 mb-2">恭喜完成所有題目！</h3>
@@ -972,31 +808,3 @@
     </script>
 </body>
 </html>
-```
-
-### 2. Firebase 設定教學
-
-要讓上面的程式碼運作，你必須取得 `firebaseConfig` 裡面的 Key。請依照以下步驟操作（完全免費）：
-
-#### 第一步：建立 Firebase 專案
-1.  前往 [Firebase Console](https://console.firebase.google.com/)。
-2.  點擊「**新增專案 (Add project)**」。
-3.  輸入專案名稱（例如：`chinese-learning-app`）。
-4.  Google Analytics 可以選擇「不啟用」(除非你想要分析功能)，然後點擊「建立專案」。
-
-#### 第二步：註冊 Web App 並取得設定
-1.  專案建立完成後，進入首頁，你會看到幾個圓形圖示。點擊 **`</>` (Web)** 圖示。
-2.  輸入 App 暱稱（例如：`Web App`），不需要勾選 Hosting，點擊「**註冊應用程式**」。
-3.  這時你會看到一大段程式碼，找到其中的 `const firebaseConfig = { ... };` 區塊。
-4.  **複製這段 Config 的內容，並貼到我上面提供的 HTML 程式碼中對應的位置。**
-
-#### 第三步：開啟 Firestore 資料庫
-1.  回到 Firebase Console 左側選單，點擊「**建構 (Build)**」->「**Firestore Database**」。
-2.  點擊「**建立資料庫 (Create database)**」。
-3.  位置 (Location) 選擇離你最近的（例如 `asia-east1` 台灣，或預設 `us-central1` 也可以）。
-4.  **安全規則設定 (Security Rules)**：
-    * 選擇「**以測試模式啟動 (Start in test mode)**」。
-    * 這允許在接下來的 30 天內任何人都能讀寫，方便你測試。
-    * *長期使用建議：* 之後如果正式上線，請到「規則 (Rules)」分頁，將規則改為：
-        ```
-        allow read, write: if request.auth != null;
